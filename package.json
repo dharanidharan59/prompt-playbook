@@ -1,0 +1,90 @@
+{
+  "name": "prompt-playbook",
+  "displayName": "Prompt Playbook",
+  "description": "AI Prompt Playbook for developers",
+  "version": "0.0.2",
+  "publisher": "dharanidharan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dharanidharan59/prompt-playbook.git"
+  },
+  "engines": {
+    "vscode": "^1.97.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:prompt-playbook.sidebarView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prompt-playbook",
+          "title": "Prompt Playbook",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "prompt-playbook": [
+        {
+          "type": "webview",
+          "id": "prompt-playbook.sidebarView",
+          "name": "Prompts"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "prompt-playbook.insertPrompt",
+        "title": "Insert Prompt"
+      },
+      {
+        "command": "prompt-playbook.copyPrompt",
+        "title": "Copy Prompt"
+      },
+      {
+        "command": "prompt-playbook.focus",
+        "title": "Focus Prompt Playbook"
+      },
+      {
+        "command": "prompt-playbook.search",
+        "title": "Search Prompts"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "prompt-playbook.focus",
+        "key": "alt+p",
+        "mac": "cmd+p",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "prompt-playbook.search",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "focusedView == 'prompt-playbook.sidebarView'"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.97.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  }
+}
