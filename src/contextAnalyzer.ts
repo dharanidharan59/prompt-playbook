@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 let cachedContext: EditorContext | null = null;
 let cachedPrompts: ContextPrompt[] = [];
 let lastAnalysisTimestamp = 0;
+let lastSelectionText: string = '';
+let lastActiveDocument: string = '';
 
 export interface EditorContext {
     languageId: string;
@@ -17,6 +19,10 @@ export interface EditorContext {
     currentClass?: string;
     imports?: string[];
     syntaxType?: string;
+    selectionRange?: {
+        startLine: number;
+        endLine: number;
+    };
 }
 
 export interface ContextPrompt {
@@ -24,6 +30,7 @@ export interface ContextPrompt {
     text: string;
     confidence: number; // 0-100 indicating relevance
     tags?: string[];
+    source?: string; // Indicates what triggered this prompt (e.g., 'selection', 'function', 'file')
 }
 
 interface CodePattern {
@@ -130,6 +137,15 @@ export class ContextAnalyzer {
         const cursorPosition = selection.active;
         const cursorLineText = document.lineAt(cursorPosition.line).text;
 
+        // Check if document or selection has changed
+        const documentId = `${document.uri.toString()}-${document.version}`;
+        const selectionChanged = selectedText !== lastSelectionText;
+        const documentChanged = documentId !== lastActiveDocument;
+
+        // Update tracking variables
+        lastSelectionText = selectedText;
+        lastActiveDocument = documentId;
+
         // Extract filename and extension
         let fileName = undefined;
         let fileExtension = undefined;
@@ -156,6 +172,17 @@ export class ContextAnalyzer {
         // Determine syntax context
         const syntaxType = this.determineSyntaxType(documentText, cursorLineText, document.languageId);
 
+        // Track selection range for better context
+        const selectionRange = selection.isEmpty ? undefined : {
+            startLine: selection.start.line,
+            endLine: selection.end.line
+        };
+
+        // If selection or document changed, invalidate cache
+        if (selectionChanged || documentChanged) {
+            this.invalidateCache();
+        }
+
         return {
             languageId: document.languageId,
             selectedText,
@@ -167,8 +194,18 @@ export class ContextAnalyzer {
             currentFunction,
             currentClass,
             imports,
-            syntaxType
+            syntaxType,
+            selectionRange
         };
+    }
+
+    /**
+     * Invalidate the context cache
+     */
+    private static invalidateCache(): void {
+        cachedContext = null;
+        cachedPrompts = [];
+        lastAnalysisTimestamp = 0;
     }
 
     /**
@@ -361,49 +398,56 @@ export class ContextAnalyzer {
      * Generate context-aware prompts based on editor context
      */
     static generateContextPrompts(context: EditorContext | null): ContextPrompt[] {
-        // Check if we can use cache (within 2 seconds)
-        const now = Date.now();
-        if (context && cachedContext &&
-            this.areContextsSimilar(context, cachedContext) &&
-            now - lastAnalysisTimestamp < 2000) {
-            console.log("Using cached context prompts");
-            return cachedPrompts;
-        }
-
+        // If no context, return empty array
         if (!context) {
             cachedContext = null;
             cachedPrompts = [];
             return [];
         }
 
+        // Check if we can use cache (within 1 second and no selection change)
+        const now = Date.now();
+        if (cachedContext && 
+            this.areContextsSimilar(context, cachedContext) &&
+            now - lastAnalysisTimestamp < 1000) {
+            return cachedPrompts;
+        }
+
+        // Always clear previous prompts when context changes significantly
         const prompts: ContextPrompt[] = [];
 
-        // Add language-specific prompts
-        this.addLanguageSpecificPrompts(prompts, context);
-
-        // Add selection-based prompts
-        if (context.selectedText) {
+        // If there's selected text, prioritize selection-based prompts
+        if (context.selectedText && context.selectedText.trim() !== '') {
             this.addSelectionBasedPrompts(prompts, context);
-        }
+            
+            // Add language-specific prompts for selection
+            this.addLanguageSpecificPrompts(prompts, context);
+        } 
+        // Otherwise analyze the cursor position, file, and other context
+        else {
+            // Add syntax-based prompts for current line
+            if (context.syntaxType) {
+                this.addSyntaxBasedPrompts(prompts, context);
+            }
 
-        // Add syntax-based prompts
-        if (context.syntaxType) {
-            this.addSyntaxBasedPrompts(prompts, context);
-        }
-
-        // Add line-based prompts if no text is selected
-        if (!context.selectedText && context.cursorLineText) {
+            // Add line-based prompts for cursor position
             this.addLineBasedPrompts(prompts, context);
+            
+            // Add file-based prompts
+            this.addFileBasedPrompts(prompts, context);
+            
+            // Add function/class-based prompts for current scope
+            this.addFunctionClassPrompts(prompts, context);
+            
+            // Add language-specific prompts as fallback
+            this.addLanguageSpecificPrompts(prompts, context);
         }
 
-        // Add file-based prompts
-        this.addFileBasedPrompts(prompts, context);
-
-        // Add function/class-based prompts
-        this.addFunctionClassPrompts(prompts, context);
-
-        // Sort by confidence
-        const sortedPrompts = prompts.sort((a, b) => b.confidence - a.confidence);
+        // Sort by confidence score
+        const sortedPrompts = prompts
+            .sort((a, b) => b.confidence - a.confidence)
+            // Ensure we have a reasonable number of prompts but not too many
+            .slice(0, 15);
 
         // Update cache
         cachedContext = context;
@@ -417,12 +461,85 @@ export class ContextAnalyzer {
      * Check if two editor contexts are similar enough to use cached results
      */
     private static areContextsSimilar(context1: EditorContext, context2: EditorContext): boolean {
+        // If selection status changed, contexts are not similar
+        const hasSelection1 = context1.selectedText && context1.selectedText.trim() !== '';
+        const hasSelection2 = context2.selectedText && context2.selectedText.trim() !== '';
+        
+        if (hasSelection1 !== hasSelection2) {
+            return false;
+        }
+        
+        // If both have selections, they must match exactly
+        if (hasSelection1 && hasSelection2 && context1.selectedText !== context2.selectedText) {
+            return false;
+        }
+        
+        // If no selections, check if other context elements match
         return context1.languageId === context2.languageId &&
             context1.fileName === context2.fileName &&
             context1.currentFunction === context2.currentFunction &&
             context1.currentClass === context2.currentClass &&
-            context1.selectedText === context2.selectedText &&
             context1.cursorLineText === context2.cursorLineText;
+    }
+
+    private static addSelectionBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
+        const selection = context.selectedText;
+        if (!selection || selection.trim() === '') return;
+
+        const lang = context.languageId;
+        const lineCount = selection.split('\n').length;
+
+        // Add selection-specific prompts with higher confidence
+        prompts.push({
+            title: 'Explain Selected Code',
+            text: `Explain what the following ${lang} code does in detail:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+            confidence: 98,
+            source: 'selection'
+        });
+
+        prompts.push({
+            title: 'Refactor Selected Code',
+            text: `Refactor this ${lang} code to improve readability and maintainability:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+            confidence: 95,
+            source: 'selection'
+        });
+
+        prompts.push({
+            title: 'Optimize Selected Code',
+            text: `Optimize this code for better performance while maintaining readability:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+            confidence: 92,
+            source: 'selection'
+        });
+
+        // For multi-line selections, add test generation prompt
+        if (lineCount > 1) {
+            prompts.push({
+                title: 'Generate Tests for Selection',
+                text: `Write comprehensive unit tests for this ${lang} code:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+                confidence: 90,
+                source: 'selection'
+            });
+        }
+
+        // For larger blocks of code, suggest documentation
+        if (selection.length > 100 || lineCount > 5) {
+            prompts.push({
+                title: 'Document Selected Code',
+                text: `Add comprehensive documentation to this ${lang} code:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+                confidence: 88,
+                source: 'selection'
+            });
+        }
+
+        // Add a security review prompt for non-trivial selections
+        if (selection.length > 50) {
+            prompts.push({
+                title: 'Security Review',
+                text: `Review this code for security vulnerabilities and suggest improvements:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
+                confidence: 85,
+                source: 'selection'
+            });
+        }
     }
 
     private static addLanguageSpecificPrompts(prompts: ContextPrompt[], context: EditorContext) {
@@ -673,28 +790,6 @@ export class ContextAnalyzer {
         }
     }
 
-    private static addSelectionBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        prompts.push({
-            title: 'Refactor Code',
-            text: `Refactor this code to improve readability and maintainability:\n\n\`\`\`${context.languageId}\n${context.selectedText}\n\`\`\``,
-            confidence: 95
-        });
-
-        prompts.push({
-            title: 'Unit Test',
-            text: `Write unit tests for this code:\n\n\`\`\`${context.languageId}\n${context.selectedText}\n\`\`\``,
-            confidence: 85
-        });
-
-        if (context.selectedText.length > 100) {
-            prompts.push({
-                title: 'Add Comments',
-                text: `Add comprehensive comments to explain this code:\n\n\`\`\`${context.languageId}\n${context.selectedText}\n\`\`\``,
-                confidence: 80
-            });
-        }
-    }
-
     private static addSyntaxBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
         // Add prompts based on detected syntax type
         switch (context.syntaxType) {
@@ -814,5 +909,13 @@ export class ContextAnalyzer {
                 tags: ['design', 'class']
             });
         }
+    }
+
+    /**
+     * Clear all context-aware prompts 
+     * Used when switching files or editors
+     */
+    static clearPrompts(): void {
+        this.invalidateCache();
     }
 }
