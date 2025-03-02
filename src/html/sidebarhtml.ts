@@ -52,17 +52,19 @@ export function getSidebarHtml(
                 <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
                     <span class="section-collapse-icon">▼</span>
                     <h1 class="header-title">Prompt Playbook</h1>
-                    <button id="collapse-all" class="collapse-all-button"></button>
                 </div>
                 <div class="section-content main-section-content">
                     <div class="search-wrapper">
-                        <div class="typeahead-container">
-                            <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
-                            <button class="clear-search" aria-label="Clear search">
-                                <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
-                                </svg>
-                            </button>
+                        <div class="search-controls">
+                            <div class="typeahead-container">
+                                <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
+                                <button class="clear-search" aria-label="Clear search">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
+                                    </svg>
+                                </button>
+                                <button id="collapse-all" class="collapse-all-button"></button>
+                            </div>
                             <div id="typeahead-dropdown" class="typeahead-dropdown"></div>
                         </div>
                     </div>

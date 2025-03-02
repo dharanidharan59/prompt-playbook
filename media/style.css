@@ -100,6 +100,58 @@ body {
     box-shadow: 0 0 0 2px var(--vscode-focusBorder);
 }
 
+/* Add new search controls wrapper to position elements */
+.search-controls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.typeahead-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Adjust collapse button position */
+.collapse-all-button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    height: 28px;
+    position: relative;
+    padding-left: 24px;
+    background: var(--vscode-button-secondaryBackground);
+    border: 1px solid var(--vscode-button-secondaryBorder);
+    border-radius: 3px;
+}
+
+/* Input and clear button alignment */
+#search {
+    margin-bottom: 0; /* Remove bottom margin since it's now in search-controls */
+}
+
+.clear-search {
+    right: 8px; /* Keep position for clear button */
+}
+
+/* Ensure dropdown appears below the search row */
+.typeahead-dropdown {
+    top: calc(100% + 4px);
+}
+
+/* Hide the dropdown when not shown */
+.typeahead-dropdown:not(.show) {
+    display: none;
+}
+
+/* Fix vertical alignment */
+.search-wrapper {
+    margin-bottom: 8px;
+}
+
 /* Category Styles */
 .category-section {
     padding-left: 0;
