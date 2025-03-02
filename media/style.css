@@ -305,10 +305,10 @@
 
 #prompt-list {
     padding: 0 4px;
-    height: calc(100vh - 140px);
-    /* Adjusted for new header */
-    overflow-y: auto;
-    /* Changed from hidden to auto */
+    /* Remove fixed height that causes the second scrollbar */
+    /* height: calc(100vh - 140px); */
+    /* Change from auto to visible to avoid the second scrollbar */
+    overflow-y: visible;
     overflow-x: hidden;
 }
 
@@ -821,9 +821,11 @@
 
 .main-section-content {
     transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
-    max-height: calc(100vh - 100px);
+    /* Remove max-height that might cause scrolling issues */
+    /* max-height: calc(100vh - 100px); */
     opacity: 1;
-    overflow: hidden;
+    overflow: visible;
+    /* Change from hidden to visible */
     padding: 8px;
 }
 
