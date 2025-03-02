@@ -161,6 +161,17 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
               </button>
           </div>
           <div class="prompt-text">${this.escapeHtml(prompt.text)}</div>
+          <div class="prompt-details">
+              ${prompt.source ? `<span class="prompt-source" title="Source of this suggestion">Source: ${this.escapeHtml(prompt.source)}</span>` : ''}
+              <span class="prompt-confidence" title="Confidence score (0-100)">
+                  <span class="confidence-bar" style="width: ${prompt.confidence}%"></span>
+                  <span class="confidence-text">${prompt.confidence}%</span>
+              </span>
+              ${prompt.tags && prompt.tags.length ?
+        `<div class="prompt-tags">
+                    ${prompt.tags.map(tag => `<span class="prompt-tag">${this.escapeHtml(tag)}</span>`).join('')}
+                </div>` : ''}
+          </div>
       </div>`
     ).join('');
   }

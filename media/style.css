@@ -1504,3 +1504,83 @@ body {
         /* Even further reduced for small screens */
     }
 }
+
+/* Prompt details styling */
+.prompt-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px dotted var(--vscode-panel-border);
+    align-items: center;
+}
+
+.prompt-source {
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.prompt-confidence {
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    min-width: 50px;
+    position: relative;
+}
+
+.confidence-bar {
+    height: 3px;
+    background-color: var(--vscode-progressBar-background);
+    border-radius: 2px;
+    margin-bottom: 2px;
+}
+
+.confidence-text {
+    font-size: 9px;
+    text-align: right;
+}
+
+.prompt-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.prompt-tag {
+    background-color: var(--vscode-editorInlayHint-background, rgba(255, 255, 255, 0.1));
+    color: var(--vscode-editorInlayHint-foreground);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+/* Make the source color distinct based on type */
+.prompt-source[title*="Source: selection"] {
+    background-color: var(--vscode-charts-blue);
+}
+
+.prompt-source[title*="Source: function"] {
+    background-color: var(--vscode-charts-orange);
+}
+
+.prompt-source[title*="Source: file"] {
+    background-color: var(--vscode-charts-green);
+}
+
+.prompt-source[title*="Source: language"] {
+    background-color: var(--vscode-charts-purple);
+}
+
+/* Adjust container to accommodate the new details */
+#context-aware-prompts .prompt-item {
+    padding-bottom: 10px;
+}
