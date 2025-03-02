@@ -146,7 +146,10 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       return '<div class="no-context">No context-aware prompts available. Open a file to see relevant prompts.</div>';
     }
 
-    return this._contextPrompts.map(prompt => `
+    // Display only the top 10 prompts
+    const topPrompts = this._contextPrompts.slice(0, 10);
+
+    return topPrompts.map(prompt => `
       <div class="prompt-item">
           <div class="prompt-header">
               <div class="prompt-title">${this.escapeHtml(prompt.title)}</div>

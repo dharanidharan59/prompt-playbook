@@ -7,14 +7,20 @@
 }
 
 /* Base styles */
+body {
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Prevent body scrolling */
+    margin: 0;
+}
+
 .sidebar-container {
     height: 100vh;
-    overflow-y: auto;
+    overflow-y: auto; /* ONLY scrollbar in the entire extension */
     overflow-x: hidden;
     padding: 0;
     display: flex;
     flex-direction: column;
-    flex: 1;
     width: 100%;
 }
 
@@ -23,20 +29,22 @@
     display: flex;
     flex-direction: column;
     min-height: min-content;
-    /* Ensure it takes at least the height of its content */
     flex: 1;
+    padding-bottom: 10px; /* Reduced from 30px to 10px */
 }
 
-.main-section-container {
-    background: var(--vscode-sideBar-background);
-    border-radius: 0;
-    margin-bottom: 16px;
-    border-left: none;
-    border-right: none;
-    border-top: 1px solid var(--vscode-panel-border);
-    border-bottom: 1px solid var(--vscode-panel-border);
-    overflow: visible;
-    /* Change from hidden to visible */
+/* Make sure NO OTHER elements have scrollbars */
+.main-section-container,
+.main-section-content,
+.prompt-list-container,
+#context-aware-prompts,
+#prompt-list,
+.category-content,
+.section-content,
+.prompt-item {
+    overflow: visible !important; /* Force visible overflow - no scrollbars */
+    max-height: none !important; /* Remove any height restrictions */
+    height: auto !important; /* Allow natural height */
 }
 
 /* Header Styles */
@@ -45,10 +53,12 @@
     background: var(--vscode-sideBarSectionHeader-background);
     border-bottom: 1px solid var(--vscode-panel-border);
     transition: var(--modern-transition);
-    position: sticky;
-    top: 0;
+    position: relative;
+    /* Not sticky */
+    top: auto;
+    /* Remove sticky positioning */
     z-index: 2;
-    background-color: var(--vscode-sideBar-background);
+    background-color: var(--vscode-sideBarSectionHeader-background);
     backdrop-filter: blur(8px);
 }
 
@@ -60,7 +70,7 @@
 
 /* Search Input Styles */
 .search-wrapper {
-    padding: 8px;
+    padding: 4px; /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     margin: 0;
@@ -73,6 +83,7 @@
     background: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-border);
     transition: var(--modern-transition);
+    margin-bottom: 8px; /* Reduced from 16px */
 }
 
 #search:focus {
@@ -91,12 +102,14 @@
     box-sizing: border-box;
     position: relative;
     z-index: 1;
+    margin-bottom: 0; /* Remove bottom margin */
+    overflow: hidden; /* Contain the collapsing content */
 }
 
 .category-header {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: 4px 8px; /* Reduced from 8px */
     background-color: var(--vscode-sideBar-background);
     color: var(--vscode-sideBarTitle-foreground);
     font-weight: bold;
@@ -106,6 +119,10 @@
     box-sizing: border-box;
     gap: 8px;
     position: relative;
+    /* Not sticky */
+    top: auto;
+    /* Remove sticky positioning */
+    z-index: 1;
 }
 
 .category-header::after {
@@ -171,36 +188,46 @@
 }
 
 .category-content {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s ease;
+    display: block;
     opacity: 1;
     transform: translateY(0);
-    overflow: visible;
-    height: auto;
-    max-height: none;
-    /* Remove max-height limit */
+    height: auto !important;
+    overflow: visible !important;
     width: 100%;
     padding: 0;
     box-sizing: border-box;
 }
 
 .category-content.collapsed {
+    max-height: 0 !important;
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
     opacity: 0;
     transform: translateY(-10px);
-    height: 0;
-    overflow: hidden;
+    transition: all 0.3s ease;
+    display: none; /* Force no space when collapsed */
 }
 
 /* Prompt Item Styles */
 .prompt-item {
-    padding: 12px;
-    margin: 4px 0;
+    padding: 8px; /* Reduced from 12px */
+    margin: 2px 0 4px 0; /* Reduced top and bottom margins */
     width: 100%;
     box-sizing: border-box;
-    border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground);
+    border: 1px solid var(--vscode-list-inactiveSelectionBackground);
+    /* Add border to clearly separate items */
+    border-radius: 4px;
+    /* Add border radius for better separation */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    overflow: hidden;
+    background-color: var(--vscode-editor-background);
+    /* Add background for better visibility */
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -269,8 +296,9 @@
 
 /* Prompt Enhancer Styles */
 .generate-prompt-container {
-    padding: 10px 16px;
+    padding: 6px 8px; /* Reduced from 10px 16px */
     /* Add horizontal padding for content */
+    overflow: visible;
 }
 
 .generate-prompt-container textarea {
@@ -294,7 +322,7 @@
 .button-container {
     display: flex;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 8px; /* Reduced from 16px or 10px */
 }
 
 .enhanced-prompt {
@@ -312,6 +340,8 @@
     font-family: var(--vscode-editor-font-family);
     font-size: var(--vscode-editor-font-size);
     line-height: 1.6;
+    overflow-y: auto;
+    /* This specific element can have a scrollbar */
 }
 
 /* Animation Styles */
@@ -337,6 +367,8 @@
     box-shadow: var(--modern-shadow);
     border: 1px solid var(--vscode-input-border);
     margin-top: 4px;
+    overflow-y: auto;
+    /* This can scroll internally */
 }
 
 .typeahead-item {
@@ -442,14 +474,18 @@
 
 .prompt-item {
     padding: 12px;
-    margin: 4px 0;
+    margin: 4px 0 8px 0; /* Reduced bottom margin from 12px to 8px */
     width: 100%;
     box-sizing: border-box;
-    border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground);
+    border: 1px solid var(--vscode-list-inactiveSelectionBackground);
+    /* Add border to clearly separate items */
+    border-radius: 4px;
+    /* Add border radius for better separation */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    overflow: hidden;
+    background-color: var(--vscode-editor-background);
+    /* Add background for better visibility */
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -689,9 +725,13 @@
 }
 
 #prompt-list {
-    padding: 0 8px;
+    padding: 0 4px; /* Reduced from 0 8px */
     width: 100%;
     box-sizing: border-box;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    transition: all 0.2s ease;
 }
 
 /* Fix category content scrolling */
@@ -742,23 +782,26 @@
 }
 
 .main-section-content {
-    overflow: visible;
+    transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
-    padding: 8px;
-    height: auto;
-    max-height: none;
-    /* Remove max-height limit */
+    overflow: visible;
+    padding: 4px; /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
+    max-height: none;
+    /* Remove any max-height restriction */
 }
 
 .main-section-content.collapsed {
-    max-height: 0;
-    opacity: 0;
-    padding: 0;
-    overflow: hidden;
+    max-height: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+    display: none; /* Force no space */
 }
 
 .section-container {
@@ -1042,8 +1085,9 @@
 
 .section-header,
 .category-header {
-    position: sticky;
-    top: 0;
+    position: relative;
+    /* Not sticky */
+    top: auto;
     z-index: 1;
     backdrop-filter: blur(8px);
     background-color: var(--vscode-sideBar-background);
@@ -1091,6 +1135,7 @@
 .generate-prompt-container {
     padding: 10px 16px;
     /* Add horizontal padding for content */
+    overflow: visible;
 }
 
 .generate-prompt-container textarea {
@@ -1238,7 +1283,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 8px; /* Reduced from 16px */
 }
 
 .header-title {
@@ -1249,10 +1294,11 @@
     flex: 1;
 }
 
+/* Fix main sections spacing */
 .main-section-container {
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 4px;
-    margin-bottom: 16px;
+    margin-bottom: 8px; /* Reduced from 14px to 8px */
+    border-top: 1px solid var(--vscode-panel-border);
+    border-bottom: 1px solid var(--vscode-panel-border);
 }
 
 .main-section-header {
@@ -1285,19 +1331,23 @@
     transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
     overflow: visible;
-    padding: 8px;
+    padding: 4px; /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
+    max-height: none;
+    /* Remove any max-height restriction */
 }
 
 .main-section-content.collapsed {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none;
+    max-height: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+    display: none; /* Force no space */
 }
 
 .category-title {
@@ -1349,6 +1399,13 @@
     animation: fadeIn 0.3s ease;
 }
 
+#context-aware-prompts {
+    max-height: none;
+    /* Remove height restriction */
+    overflow: visible;
+    padding-bottom: 2px; /* Reduced from 8px */
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -1358,5 +1415,17 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Fix scrolling for the entire sidebar */
+@media (max-height: 600px) {
+    .sidebar-container {
+        padding-bottom: 100px;
+        /* Add extra padding for small screens */
+    }
+
+    .sections-wrapper {
+        padding-bottom: 20px; /* Even further reduced for small screens */
     }
 }
