@@ -10,13 +10,15 @@
 body {
     padding: 0;
     height: 100vh;
-    overflow: hidden; /* Prevent body scrolling */
+    overflow: hidden;
+    /* Prevent body scrolling */
     margin: 0;
 }
 
 .sidebar-container {
     height: 100vh;
-    overflow-y: auto; /* ONLY scrollbar in the entire extension */
+    overflow-y: auto;
+    /* ONLY scrollbar in the entire extension */
     overflow-x: hidden;
     padding: 0;
     display: flex;
@@ -30,7 +32,8 @@ body {
     flex-direction: column;
     min-height: min-content;
     flex: 1;
-    padding-bottom: 10px; /* Reduced from 30px to 10px */
+    padding-bottom: 10px;
+    /* Reduced from 30px to 10px */
 }
 
 /* Make sure NO OTHER elements have scrollbars */
@@ -42,9 +45,12 @@ body {
 .category-content,
 .section-content,
 .prompt-item {
-    overflow: visible !important; /* Force visible overflow - no scrollbars */
-    max-height: none !important; /* Remove any height restrictions */
-    height: auto !important; /* Allow natural height */
+    overflow: visible !important;
+    /* Force visible overflow - no scrollbars */
+    max-height: none !important;
+    /* Remove any height restrictions */
+    height: auto !important;
+    /* Allow natural height */
 }
 
 /* Header Styles */
@@ -70,7 +76,8 @@ body {
 
 /* Search Input Styles */
 .search-wrapper {
-    padding: 4px; /* Reduced from 8px */
+    padding: 4px;
+    /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     margin: 0;
@@ -83,7 +90,8 @@ body {
     background: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-border);
     transition: var(--modern-transition);
-    margin-bottom: 8px; /* Reduced from 16px */
+    margin-bottom: 8px;
+    /* Reduced from 16px */
 }
 
 #search:focus {
@@ -102,14 +110,17 @@ body {
     box-sizing: border-box;
     position: relative;
     z-index: 1;
-    margin-bottom: 0; /* Remove bottom margin */
-    overflow: hidden; /* Contain the collapsing content */
+    margin-bottom: 0;
+    /* Remove bottom margin */
+    overflow: hidden;
+    /* Contain the collapsing content */
 }
 
 .category-header {
     display: flex;
     align-items: center;
-    padding: 4px 8px; /* Reduced from 8px */
+    padding: 4px 8px;
+    /* Reduced from 8px */
     background-color: var(--vscode-sideBar-background);
     color: var(--vscode-sideBarTitle-foreground);
     font-weight: bold;
@@ -210,13 +221,16 @@ body {
     opacity: 0;
     transform: translateY(-10px);
     transition: all 0.3s ease;
-    display: none; /* Force no space when collapsed */
+    display: none;
+    /* Force no space when collapsed */
 }
 
 /* Prompt Item Styles */
 .prompt-item {
-    padding: 8px; /* Reduced from 12px */
-    margin: 2px 0 4px 0; /* Reduced top and bottom margins */
+    padding: 8px;
+    /* Reduced from 12px */
+    margin: 2px 0 4px 0;
+    /* Reduced top and bottom margins */
     width: 100%;
     box-sizing: border-box;
     border: 1px solid var(--vscode-list-inactiveSelectionBackground);
@@ -296,7 +310,8 @@ body {
 
 /* Prompt Enhancer Styles */
 .generate-prompt-container {
-    padding: 6px 8px; /* Reduced from 10px 16px */
+    padding: 6px 8px;
+    /* Reduced from 10px 16px */
     /* Add horizontal padding for content */
     overflow: visible;
 }
@@ -322,7 +337,8 @@ body {
 .button-container {
     display: flex;
     gap: 12px;
-    margin-bottom: 8px; /* Reduced from 16px or 10px */
+    margin-bottom: 8px;
+    /* Reduced from 16px or 10px */
 }
 
 .enhanced-prompt {
@@ -474,7 +490,8 @@ body {
 
 .prompt-item {
     padding: 12px;
-    margin: 4px 0 8px 0; /* Reduced bottom margin from 12px to 8px */
+    margin: 4px 0 8px 0;
+    /* Reduced bottom margin from 12px to 8px */
     width: 100%;
     box-sizing: border-box;
     border: 1px solid var(--vscode-list-inactiveSelectionBackground);
@@ -725,7 +742,8 @@ body {
 }
 
 #prompt-list {
-    padding: 0 4px; /* Reduced from 0 8px */
+    padding: 0 4px;
+    /* Reduced from 0 8px */
     width: 100%;
     box-sizing: border-box;
     height: auto;
@@ -785,7 +803,8 @@ body {
     transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
     overflow: visible;
-    padding: 4px; /* Reduced from 8px */
+    padding: 4px;
+    /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     position: relative;
@@ -801,7 +820,8 @@ body {
     margin: 0 !important;
     border: none !important;
     overflow: hidden !important;
-    display: none; /* Force no space */
+    display: none;
+    /* Force no space */
 }
 
 .section-container {
@@ -1283,7 +1303,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 8px;
-    margin-bottom: 8px; /* Reduced from 16px */
+    margin-bottom: 8px;
+    /* Reduced from 16px */
 }
 
 .header-title {
@@ -1296,7 +1317,8 @@ body {
 
 /* Fix main sections spacing */
 .main-section-container {
-    margin-bottom: 8px; /* Reduced from 14px to 8px */
+    margin-bottom: 8px;
+    /* Reduced from 14px to 8px */
     border-top: 1px solid var(--vscode-panel-border);
     border-bottom: 1px solid var(--vscode-panel-border);
 }
@@ -1331,7 +1353,8 @@ body {
     transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
     overflow: visible;
-    padding: 4px; /* Reduced from 8px */
+    padding: 4px;
+    /* Reduced from 8px */
     width: 100%;
     box-sizing: border-box;
     position: relative;
@@ -1347,7 +1370,8 @@ body {
     margin: 0 !important;
     border: none !important;
     overflow: hidden !important;
-    display: none; /* Force no space */
+    display: none;
+    /* Force no space */
 }
 
 .category-title {
@@ -1377,19 +1401,16 @@ body {
     font-style: italic;
 }
 
+/* Remove the refresh button styles */
 #refresh-context {
-    font-size: 14px;
-    color: var(--vscode-foreground);
-    background: none;
-    border: none;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    display: none;
+    /* Hide the refresh button */
 }
 
+/* Remove the hover/rotation effect for the now-hidden refresh button */
 #refresh-context:hover {
     opacity: 1;
-    transform: rotate(180deg);
+    transform: none;
 }
 
 #context-aware-prompts .prompt-item {
@@ -1403,7 +1424,8 @@ body {
     max-height: none;
     /* Remove height restriction */
     overflow: visible;
-    padding-bottom: 2px; /* Reduced from 8px */
+    padding-bottom: 2px;
+    /* Reduced from 8px */
 }
 
 @keyframes fadeIn {
@@ -1426,6 +1448,7 @@ body {
     }
 
     .sections-wrapper {
-        padding-bottom: 20px; /* Even further reduced for small screens */
+        padding-bottom: 20px;
+        /* Even further reduced for small screens */
     }
 }

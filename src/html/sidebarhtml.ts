@@ -39,7 +39,6 @@ export function getSidebarHtml(
                 <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
                     <span class="section-collapse-icon">▼</span>
                     <h1 class="header-title">Context-Aware Prompts</h1>
-                    <button id="refresh-context" class="collapse-all-button" title="Refresh context">↻</button>
                 </div>
                 <div class="section-content main-section-content">
                     <div id="context-aware-prompts" class="prompt-list-container">
@@ -187,12 +186,6 @@ export function getSidebarHtml(
                     header.setAttribute('aria-expanded', 'true');
                 }
             });
-        });
-
-        // Refresh context prompts button
-        document.getElementById('refresh-context')?.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent triggering section collapse
-            vscode.postMessage({ type: 'refreshContext' });
         });
 
         // Handle context-aware prompts updates
