@@ -32,57 +32,59 @@ export function getSidebarHtml(
 </head>
 <body>
     <div class="sidebar-container">
-        <div class="main-section-container">
-            <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
-                <span class="section-collapse-icon">▼</span>
-                <h1 class="header-title">Prompt Playbook</h1>
-                <button id="collapse-all" class="collapse-all-button"></button>
-            </div>
-            <div class="section-content main-section-content">
-                <div class="search-wrapper">
-                    <div class="typeahead-container">
-                        <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
-                        <button class="clear-search" aria-label="Clear search">
-                            <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
-                            </svg>
-                        </button>
-                        <div id="typeahead-dropdown" class="typeahead-dropdown"></div>
-                    </div>
+        <div class="sections-wrapper">
+            <div class="main-section-container">
+                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                    <span class="section-collapse-icon">▼</span>
+                    <h1 class="header-title">Prompt Playbook</h1>
+                    <button id="collapse-all" class="collapse-all-button"></button>
                 </div>
-                <div id="prompt-list">
-                    ${renderPromptList}
-                    <div id="no-results" style="display: none; text-align: center; padding: 20px;">
-                        No matching prompts found
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add Prompt Enhancer Section -->
-        <div class="main-section-container">
-            <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
-                <span class="section-collapse-icon">▼</span>
-                <h1 class="header-title">Prompt Enhancer</h1>
-            </div>
-            <div class="section-content main-section-content">
-                <div class="generate-prompt-container">
-                    <textarea id="promptInput" placeholder="Enter your prompt here to enhance it..." rows="4"></textarea>
-                    <div class="button-container">
-                        <button id="enhanceButton" class="action-button">
-                            Enhance Prompt
-                        </button>
-                        <button id="clearButton" class="action-button secondary">
-                            Clear
-                        </button>
-                    </div>
-                    <div class="enhanced-prompt" style="display: none;">
-                        <h4>Enhanced Prompt:</h4>
-                        <div id="enhancedContent"></div>
-                        <div class="button-container">
-                            <button id="copyEnhanced" class="action-button">
-                                Copy Enhanced Prompt
+                <div class="section-content main-section-content">
+                    <div class="search-wrapper">
+                        <div class="typeahead-container">
+                            <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
+                            <button class="clear-search" aria-label="Clear search">
+                                <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
+                                </svg>
                             </button>
+                            <div id="typeahead-dropdown" class="typeahead-dropdown"></div>
+                        </div>
+                    </div>
+                    <div id="prompt-list" class="prompt-list-container">
+                        ${renderPromptList}
+                        <div id="no-results" style="display: none; text-align: center; padding: 20px;">
+                            No matching prompts found
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Prompt Enhancer Section -->
+            <div class="main-section-container">
+                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                    <span class="section-collapse-icon">▼</span>
+                    <h1 class="header-title">Prompt Enhancer</h1>
+                </div>
+                <div class="section-content main-section-content">
+                    <div class="generate-prompt-container">
+                        <textarea id="promptInput" placeholder="Enter your prompt here to enhance it..." rows="4"></textarea>
+                        <div class="button-container">
+                            <button id="enhanceButton" class="action-button">
+                                Enhance Prompt
+                            </button>
+                            <button id="clearButton" class="action-button secondary">
+                                Clear
+                            </button>
+                        </div>
+                        <div class="enhanced-prompt" style="display: none;">
+                            <h4>Enhanced Prompt:</h4>
+                            <div id="enhancedContent"></div>
+                            <div class="button-container">
+                                <button id="copyEnhanced" class="action-button">
+                                    Copy Enhanced Prompt
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -134,9 +136,15 @@ export function getSidebarHtml(
                 if (!content) return;
                 
                 const isCollapsed = header.classList.contains('collapsed');
+                const collapseIcon = header.querySelector('.category-collapse-icon');
+                
                 header.classList.toggle('collapsed');
                 content.classList.toggle('collapsed');
                 header.setAttribute('aria-expanded', String(!isCollapsed));
+                
+                if (collapseIcon) {
+                    collapseIcon.textContent = isCollapsed ? '▼' : '▶';
+                }
             });
         });
 

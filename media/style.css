@@ -1,8 +1,375 @@
-.category-section {
+/* Modern Theme Variables */
+:root {
+    --modern-border-radius: 8px;
+    --modern-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --modern-transition: all 0.2s ease-in-out;
+    --modern-spacing: 16px;
+}
+
+/* Base styles */
+.sidebar-container {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+}
+
+/* Container for all sections */
+.sections-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: min-content;
+    /* Ensure it takes at least the height of its content */
+    flex: 1;
+}
+
+.main-section-container {
+    background: var(--vscode-sideBar-background);
+    border-radius: 0;
+    margin-bottom: 16px;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid var(--vscode-panel-border);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    overflow: visible;
+    /* Change from hidden to visible */
+}
+
+/* Header Styles */
+.main-section-header {
+    padding: 12px 16px;
+    background: var(--vscode-sideBarSectionHeader-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    transition: var(--modern-transition);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--vscode-sideBar-background);
+    backdrop-filter: blur(8px);
+}
+
+.header-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Search Input Styles */
+.search-wrapper {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
     margin: 0;
-    padding-left: 8px;
+}
+
+#search {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--modern-border-radius);
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    transition: var(--modern-transition);
+}
+
+#search:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+}
+
+/* Category Styles */
+.category-section {
+    padding-left: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBarTitle-foreground);
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+    gap: 8px;
+    position: relative;
+}
+
+.category-header::after {
+    display: none;
+    /* Remove the previous arrow */
+}
+
+.category-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.category-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+
+.prompt-count {
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    min-width: 20px;
+    text-align: center;
+    margin-right: 24px;
+    /* Add space for the collapse icon */
+    flex-shrink: 0;
+}
+
+/* Add new collapse icon style */
+.category-collapse-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--vscode-foreground);
+    opacity: 0.8;
+    transition: transform 0.2s ease;
+}
+
+.category-header.collapsed .category-collapse-icon {
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.category-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.category-header.collapsed {
+    opacity: 0.8;
+}
+
+.category-content {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+    overflow: visible;
+    height: auto;
+    max-height: none;
+    /* Remove max-height limit */
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.category-content.collapsed {
+    opacity: 0;
+    transform: translateY(-10px);
+    height: 0;
+    overflow: hidden;
+}
+
+/* Prompt Item Styles */
+.prompt-item {
+    padding: 12px;
+    margin: 4px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.prompt-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--modern-shadow);
+}
+
+.prompt-header {
+    margin-bottom: 8px;
+}
+
+.prompt-title {
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+}
+
+.prompt-text {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--vscode-foreground);
+    opacity: 0.9;
+    width: 100%;
+    padding: 4px 0;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Button Styles */
+.copy-button {
+    padding: 6px 12px;
+    border-radius: var(--modern-border-radius);
+    transition: var(--modern-transition);
+    background: var(--vscode-button-secondaryBackground);
+    border: 1px solid var(--vscode-button-border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.copy-button:hover {
+    background: var(--vscode-button-secondaryHoverBackground);
+    transform: translateY(-1px);
+}
+
+.copy-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+.action-button {
+    padding: 8px 16px;
+    border-radius: var(--modern-border-radius);
+    font-weight: 500;
+    transition: var (--modern-transition);
+    border: none;
+    min-width: 100px;
+}
+
+.action-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--modern-shadow);
+}
+
+/* Prompt Enhancer Styles */
+.generate-prompt-container {
+    padding: 10px 16px;
+    /* Add horizontal padding for content */
+}
+
+.generate-prompt-container textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--modern-border-radius);
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    min-height: 100px;
+    transition: var(--modern-transition);
+    margin-bottom: 16px;
+    font-family: var(--vscode-editor-font-family);
+}
+
+.generate-prompt-container textarea:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+}
+
+.button-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.enhanced-prompt {
+    background: var(--vscode-editor-background);
+    border-radius: var(--modern-border-radius);
+    padding: 16px;
+    margin-top: 20px;
+    border: 1px solid var(--vscode-panel-border);
+}
+
+#enhancedContent {
+    padding: 12px;
+    border-radius: var(--modern-border-radius);
+    background: var (--vscode-editor-background);
+    font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    line-height: 1.6;
+}
+
+/* Animation Styles */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.enhanced-prompt {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Typeahead Styles */
+.typeahead-dropdown {
+    border-radius: var(--modern-border-radius);
+    box-shadow: var(--modern-shadow);
+    border: 1px solid var(--vscode-input-border);
+    margin-top: 4px;
+}
+
+.typeahead-item {
+    padding: 10px 16px;
+    transition: var(--modern-transition);
+}
+
+.typeahead-item:hover,
+.typeahead-item.selected {
+    background: var(--vscode-list-hoverBackground);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .button-container {
+        flex-direction: column;
+    }
+
+    .action-button {
+        width: 100%;
+    }
+}
+
+.category-section {
+    padding-left: 0;
+    margin: 0;
     border-bottom: 1px solid var(--vscode-panel-border);
     transition: opacity 0.2s ease;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 
 .category-section.empty {
@@ -23,19 +390,22 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s ease;
-    padding-right: 32px;
-    /* Space for the collapse icon */
     gap: 8px;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
 }
 
 .category-header::after {
     content: "▼";
     position: absolute;
-    right: 12px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 10px;
     transition: transform 0.2s ease;
+    margin-left: auto;
+    padding-left: 8px;
 }
 
 .category-header.collapsed::after {
@@ -51,22 +421,30 @@
 }
 
 .category-content {
-    transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
-    max-height: 2000px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     opacity: 1;
     transform: translateY(0);
-    overflow: hidden;
+    overflow: visible;
+    height: auto;
+    max-height: none;
+    /* Remove max-height limit */
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .category-content.collapsed {
-    max-height: 0;
     opacity: 0;
     transform: translateY(-10px);
-    pointer-events: none;
+    height: 0;
+    overflow: hidden;
 }
 
 .prompt-item {
-    padding: 8px;
+    padding: 12px;
+    margin: 4px 0;
+    width: 100%;
+    box-sizing: border-box;
     border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground);
     display: flex;
     flex-direction: column;
@@ -95,8 +473,14 @@
 }
 
 .prompt-text {
-    overflow: hidden;
-    text-overflow: clip;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--vscode-foreground);
+    opacity: 0.9;
+    width: 100%;
+    padding: 4px 0;
+    box-sizing: border-box;
+    white-space: pre-wrap;
     word-break: break-word;
 }
 
@@ -269,9 +653,10 @@
 
 .search-wrapper {
     position: relative;
-    margin-bottom: 16px;
-    padding: 0 8px;
-    margin-top: 8px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .clear-search {
@@ -304,12 +689,76 @@
 }
 
 #prompt-list {
-    padding: 0 4px;
-    /* Remove fixed height that causes the second scrollbar */
-    /* height: calc(100vh - 140px); */
-    /* Change from auto to visible to avoid the second scrollbar */
-    overflow-y: visible;
-    overflow-x: hidden;
+    padding: 0 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix category content scrolling */
+.category-content {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+    overflow: visible;
+    height: auto;
+    max-height: none;
+    /* Remove max-height limit */
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.category-content.collapsed {
+    opacity: 0;
+    transform: translateY(-10px);
+    height: 0;
+    overflow: hidden;
+}
+
+/* Remove fixed heights and let content flow */
+#prompt-list {
+    overflow: visible;
+    padding: 0 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section-content {
+    overflow: visible;
+    opacity: 1;
+    padding: 8px;
+    height: auto;
+    max-height: none;
+    /* Remove max-height limit */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section-content.collapsed {
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.main-section-content {
+    overflow: visible;
+    opacity: 1;
+    padding: 8px;
+    height: auto;
+    max-height: none;
+    /* Remove max-height limit */
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+.main-section-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .section-container {
@@ -320,8 +769,14 @@
 }
 
 .category-section {
+    padding-left: 0;
     margin: 0;
     border-bottom: 1px solid var(--vscode-panel-border);
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 
 .category-section:last-child {
@@ -334,6 +789,9 @@
     opacity: 1;
     transform: translateY(0);
     overflow: hidden;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .category-content.collapsed {
@@ -344,6 +802,8 @@
 
 .prompt-list {
     padding: 0 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .section-header {
@@ -356,7 +816,6 @@
 
 .section-header::before {
     display: none;
-    /* Remove the default arrow */
 }
 
 .section-header:hover {
@@ -431,11 +890,13 @@
 }
 
 .section-content {
-    overflow: hidden;
+    overflow: visible;
     transition: max-height 0.3s ease-out, opacity 0.2s ease, padding 0.3s ease;
     opacity: 1;
     max-height: 100vh;
     padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .section-content.collapsed {
@@ -628,7 +1089,8 @@
 }
 
 .generate-prompt-container {
-    padding: 10px;
+    padding: 10px 16px;
+    /* Add horizontal padding for content */
 }
 
 .generate-prompt-container textarea {
@@ -749,7 +1211,7 @@
 .typeahead-item .category {
     font-size: 0.85em;
     opacity: 0.7;
-    color: var(--vscode-descriptionForeground);
+    color: var (--vscode-descriptionForeground);
     white-space: nowrap;
 }
 
@@ -821,12 +1283,13 @@
 
 .main-section-content {
     transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
-    /* Remove max-height that might cause scrolling issues */
-    /* max-height: calc(100vh - 100px); */
     opacity: 1;
     overflow: visible;
-    /* Change from hidden to visible */
     padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 
 .main-section-content.collapsed {
@@ -842,6 +1305,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-right: 8px;
 }
 
 .prompt-count {
@@ -852,5 +1316,5 @@
     font-size: 11px;
     min-width: 20px;
     text-align: center;
-    margin-right: 8px;
+    margin-right: 18px;
 }

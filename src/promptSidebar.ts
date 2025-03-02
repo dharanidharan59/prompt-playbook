@@ -100,18 +100,19 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       const prompts = this._prompts.filter(p => p.category === category);
       const categoryIcon = categoryIcons[category] || { icon: '📁', color: '#757575' };
       return `
-                <div class="category-section">
-                    <div class="category-header" role="button" tabindex="0" aria-expanded="true">
-                        <span class="category-icon" style="color: ${categoryIcon.color}">${categoryIcon.icon}</span>
-                        <span class="category-title">${this.escapeHtml(category)}</span>
-                        <span class="prompt-count">${prompts.length}</span>
+            <div class="category-section">
+                <div class="category-header" role="button" tabindex="0" aria-expanded="true">
+                    <span class="category-icon" style="color: ${categoryIcon.color}">${categoryIcon.icon}</span>
+                    <span class="category-title">${this.escapeHtml(category)}</span>
+                    <span class="prompt-count">${prompts.length}</span>
+                    <span class="category-collapse-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="prompt-list">
+                        ${prompts.map(prompt => this.renderPromptItem(prompt)).join('')}
                     </div>
-                    <div class="category-content">
-                        <div class="prompt-list">
-                            ${prompts.map(prompt => this.renderPromptItem(prompt)).join('')}
-                        </div>
-                    </div>
-                </div>`;
+                </div>
+            </div>`;
     }).join('');
   }
 
