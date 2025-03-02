@@ -1,0 +1,442 @@
+[
+    {
+        "text": "How can I containerize this legacy application? Analyze the application architecture and provide guidance on containerization strategy, including Dockerfile creation, service orchestration, and deployment considerations.",
+        "title": "Containerization",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "How to migrate this monolithic application to microservices? Provide a step-by-step guide for breaking down the monolith, identifying service boundaries, and implementing inter-service communication.",
+        "title": "Microservices Migration",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "Suggest cloud-native patterns for this application. Identify opportunities to implement cloud-native patterns like circuit breakers, service discovery, and distributed configuration.",
+        "title": "Cloud Native Patterns",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "How to implement a CI/CD pipeline for this legacy application? Design a modern CI/CD workflow including automated testing, security scanning, and deployment strategies.",
+        "title": "Modern CI/CD",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "Convert this application to use cloud services. Identify opportunities to replace traditional components with managed cloud services and suggest implementation approaches.",
+        "title": "Cloud Migration",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "How to implement API Gateway pattern for this application? Design an API Gateway solution for managing traffic, authentication, and service composition.",
+        "title": "API Gateway",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "Modernize the data layer of this application. Suggest strategies for migrating legacy databases to modern data stores, implementing caching, and handling data migration.",
+        "title": "Data Modernization",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "How to implement observability in this application? Add logging, metrics, and tracing capabilities to improve monitoring and debugging in a distributed environment.",
+        "title": "Observability",
+        "category": "Application Modernization"
+    },
+    {
+        "text": "How to handle high concurrency in this code? Provide examples and best practices for managing concurrent requests and avoiding race conditions.",
+        "title": "Concurrency",
+        "category": "Performance"
+    },
+    {
+        "text": "Suggest caching strategies for this functionality. Consider different levels of caching (e.g., browser, server, database) and recommend the most appropriate approach.",
+        "title": "Caching",
+        "category": "Performance"
+    },
+    {
+        "text": "How can I reduce the memory usage? Identify potential memory leaks and suggest ways to optimize memory allocation and deallocation.",
+        "title": "Memory Usage",
+        "category": "Performance"
+    },
+    {
+        "text": "Optimize this code for better performance. Analyze the code for bottlenecks and suggest improvements to reduce execution time and resource consumption.",
+        "title": "Optimization",
+        "category": "Performance"
+    },
+    {
+        "text": "How to prevent SQL injection in this code? Provide examples of parameterized queries and input validation techniques to mitigate SQL injection vulnerabilities.",
+        "title": "SQL Injection",
+        "category": "Security"
+    },
+    {
+        "text": "What security headers should I add? Recommend a list of security headers to protect against common web vulnerabilities like XSS and clickjacking.",
+        "title": "Headers",
+        "category": "Security"
+    },
+    {
+        "text": "How to implement secure authentication? Describe different authentication methods (e.g., OAuth, JWT) and provide guidance on implementing secure user authentication.",
+        "title": "Authentication",
+        "category": "Security"
+    },
+    {
+        "text": "Review this code for security best practices. Identify potential security vulnerabilities and suggest improvements to follow security best practices.",
+        "title": "Security Review",
+        "category": "Security"
+    },
+    {
+        "text": "Design GraphQL queries for this schema. Provide examples of efficient and secure GraphQL queries for retrieving data from the schema.",
+        "title": "GraphQL Design",
+        "category": "API Design"
+    },
+    {
+        "text": "How should I handle API authentication? Describe different API authentication methods (e.g., API keys, OAuth) and provide guidance on implementing secure API authentication.",
+        "title": "API Security",
+        "category": "API Design"
+    },
+    {
+        "text": "What's the best way to version this API? Discuss different API versioning strategies (e.g., URI versioning, header versioning) and recommend the most appropriate approach.",
+        "title": "API Versioning",
+        "category": "API Design"
+    },
+    {
+        "text": "Design a RESTful API for [feature]. Define the API endpoints, request/response formats, and authentication mechanisms for the feature.",
+        "title": "REST API",
+        "category": "API Design"
+    },
+    {
+        "text": "Suggest a database schema for this feature. Define the tables, columns, data types, and relationships for storing data related to the feature.",
+        "title": "Database Design",
+        "category": "Architecture"
+    },
+    {
+        "text": "How should I organize these components? Recommend a component-based architecture and provide guidance on organizing components for reusability and maintainability.",
+        "title": "Component Organization",
+        "category": "Architecture"
+    },
+    {
+        "text": "What's the best way to structure this application? Discuss different application architectures (e.g., MVC, microservices) and recommend the most appropriate approach.",
+        "title": "App Structure",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design a system architecture for [requirement]. Define the components, interactions, and deployment strategy for the system.",
+        "title": "System Design",
+        "category": "Architecture"
+    },
+    {
+        "text": "Convert this code to use modern syntax. Identify outdated syntax and suggest improvements to use modern language features and best practices.",
+        "title": "Modernize",
+        "category": "Refactoring"
+    },
+    {
+        "text": "Suggest ways to reduce code duplication. Analyze the code for duplicated logic and recommend refactoring techniques to eliminate redundancy.",
+        "title": "Remove Duplication",
+        "category": "Refactoring"
+    },
+    {
+        "text": "How can I make this code more maintainable? Identify areas of the code that are difficult to understand or modify and suggest improvements to enhance maintainability.",
+        "title": "Maintainability",
+        "category": "Refactoring"
+    },
+    {
+        "text": "Refactor this code to use [pattern/approach]. Apply a specific design pattern or architectural approach to improve the structure and flexibility of the code.",
+        "title": "Pattern Refactor",
+        "category": "Refactoring"
+    },
+    {
+        "text": "How to test async functionality? Provide examples of unit tests and integration tests for asynchronous code, including handling promises, callbacks, and async/await.",
+        "title": "Async Testing",
+        "category": "Testing"
+    },
+    {
+        "text": "Create integration tests for these components. Define integration tests to verify the interactions between different components of the system.",
+        "title": "Integration Tests",
+        "category": "Testing"
+    },
+    {
+        "text": "Generate mock data for testing. Create realistic mock data for testing different scenarios and edge cases.",
+        "title": "Mock Data",
+        "category": "Testing"
+    },
+    {
+        "text": "Write test cases for edge conditions. Identify potential edge cases and write test cases to ensure the code handles them correctly.",
+        "title": "Edge Cases",
+        "category": "Testing"
+    },
+    {
+        "text": "How can I fix this performance issue? Analyze the code for performance bottlenecks and suggest specific changes to improve performance.",
+        "title": "Performance Debug",
+        "category": "Debugging"
+    },
+    {
+        "text": "What could be causing this unexpected behavior? Investigate the code and identify potential causes for the unexpected behavior.",
+        "title": "Behavior Analysis",
+        "category": "Debugging"
+    },
+    {
+        "text": "Help me debug this code that's not working as expected. Provide step-by-step instructions and debugging techniques to identify and fix the issue.",
+        "title": "Debug Help",
+        "category": "Debugging"
+    },
+    {
+        "text": "Why am I getting this error: [paste error]? Analyze the error message and provide possible causes and solutions.",
+        "title": "Error Analysis",
+        "category": "Debugging"
+    },
+    {
+        "text": "Identify potential memory leaks in this code. Analyze the code for memory allocation and deallocation patterns and identify potential memory leaks.",
+        "title": "Memory Issues",
+        "category": "Code Review"
+    },
+    {
+        "text": "Suggest improvements for code readability. Identify areas of the code that are difficult to understand and suggest improvements to enhance readability.",
+        "title": "Readability",
+        "category": "Code Review"
+    },
+    {
+        "text": "Check if this code follows best practices. Review the code for adherence to coding standards, design principles, and other best practices.",
+        "title": "Best Practices",
+        "category": "Code Review"
+    },
+    {
+        "text": "Review this code for security vulnerabilities. Identify potential security vulnerabilities and suggest improvements to mitigate them.",
+        "title": "Security Review",
+        "category": "Code Review"
+    },
+    {
+        "text": "Generate API documentation for this code. Create comprehensive API documentation, including endpoints, request/response formats, and authentication mechanisms.",
+        "title": "API Documentation",
+        "category": "Code Generation"
+    },
+    {
+        "text": "Create a unit test for this function. Write a unit test to verify the functionality of the function.",
+        "title": "Unit Test",
+        "category": "Code Generation"
+    },
+    {
+        "text": "Write a class to implement [describe requirement]. Define the class structure, properties, and methods to fulfill the requirement.",
+        "title": "Create Class",
+        "category": "Code Generation"
+    },
+    {
+        "text": "Generate a function that [describe functionality]. Define the function signature, input parameters, and return value to implement the functionality.",
+        "title": "Generate Function",
+        "category": "Code Generation"
+    },
+    {
+        "text": "What design patterns are used in this code? Identify the design patterns used in the code and explain their purpose and implementation.",
+        "title": "Pattern Analysis",
+        "category": "Code Understanding"
+    },
+    {
+        "text": "How can this code be optimized for better performance? Analyze the code for performance bottlenecks and suggest specific optimizations.",
+        "title": "Performance Analysis",
+        "category": "Code Understanding"
+    },
+    {
+        "text": "What are the potential issues or bugs in this code? Identify potential issues, bugs, and vulnerabilities in the code.",
+        "title": "Find Issues",
+        "category": "Code Understanding"
+    },
+    {
+        "text": "Explain what this code does and how it works. Provide a clear and concise explanation of the code's functionality and implementation.",
+        "title": "Explain Code",
+        "category": "Code Understanding"
+    },
+    {
+        "text": "Review this code for specific accessibility issues. Check for ARIA attributes, semantic HTML, keyboard navigation, and screen reader compatibility. Suggest improvements to make the application more accessible following WCAG guidelines.",
+        "title": "Accessibility Review",
+        "category": "Code Review"
+    },
+    {
+        "text": "Analyze this code for scalability concerns. Consider scenarios with increased load, data volume, and user count. Identify potential bottlenecks in database queries, API calls, and resource usage. Suggest architectural improvements for better scalability.",
+        "title": "Scalability Analysis",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement error handling and logging best practices. Review current error handling, suggest try-catch implementations, error boundary setup, and logging strategies. Consider different types of errors (runtime, network, validation) and appropriate recovery mechanisms.",
+        "title": "Error Handling",
+        "category": "Code Generation"
+    },
+    {
+        "text": "Implement monitoring and observability features. Add logging, metrics collection, and tracing capabilities. Consider integration with monitoring tools, define key performance indicators (KPIs), and set up alerting thresholds.",
+        "title": "Monitoring Setup",
+        "category": "Performance"
+    },
+    {
+        "text": "Develop a comprehensive CI/CD pipeline for this project. Include steps for code linting, testing, security scanning, build optimization, and deployment. Consider different environments (dev, staging, prod) and necessary quality gates.",
+        "title": "CI/CD Setup",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement rate limiting and throttling mechanisms. Design and implement rate limiting for APIs, consider different strategies (token bucket, leaky bucket), handle rate limit errors, and implement retry mechanisms with exponential backoff.",
+        "title": "Rate Limiting",
+        "category": "API Design"
+    },
+    {
+        "text": "Review and optimize database queries. Analyze query performance, suggest indexing strategies, optimize JOIN operations, implement query caching, and consider database-specific optimizations (e.g., PostgreSQL, MongoDB specific features).",
+        "title": "Query Optimization",
+        "category": "Performance"
+    },
+    {
+        "text": "Implement comprehensive input validation and sanitization. Add validation for all user inputs, implement sanitization for different data types, consider XSS prevention, and handle validation errors gracefully with meaningful error messages.",
+        "title": "Input Validation",
+        "category": "Security"
+    },
+    {
+        "text": "Design and implement a robust state management solution. Consider different state management patterns (Redux, MobX, Context API), implement optimistic updates, handle loading and error states, and manage complex state interactions.",
+        "title": "State Management",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement comprehensive logging and audit trails. Design logging strategy for different environments, implement structured logging, add request/response logging, track user actions, and consider compliance requirements (GDPR, HIPAA).",
+        "title": "Logging Strategy",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement internationalization (i18n) and localization (l10n) features. Design a system for managing translations, handling different date/time formats, currency displays, and RTL layouts. Consider dynamic language switching, fallback mechanisms, and translation management workflow.",
+        "title": "Internationalization",
+        "category": "Architecture"
+    },
+    {
+        "text": "Containerize this application using Docker. Create optimized Dockerfile(s), set up multi-stage builds, implement health checks, configure volume mappings, and optimize container security. Consider development and production configurations, and provide container orchestration recommendations.",
+        "title": "Containerization",
+        "category": "DevOps"
+    },
+    {
+        "text": "Design and implement an event-driven architecture. Set up event publishers/subscribers, implement message queues, handle event serialization, ensure event ordering, and implement retry mechanisms. Consider event schemas, versioning, and backward compatibility.",
+        "title": "Event Architecture",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement advanced testing scenarios including chaos testing and resilience testing. Design tests for system failures, network latency, service unavailability, and data corruption. Include recovery testing and service degradation handling.",
+        "title": "Resilience Testing",
+        "category": "Testing"
+    },
+    {
+        "text": "Implement WebSocket communication with proper error handling and reconnection logic. Set up bi-directional communication, handle connection lifecycle, implement heartbeat mechanism, and manage connection pools. Consider scalability and load balancing implications.",
+        "title": "WebSocket Implementation",
+        "category": "API Design"
+    },
+    {
+        "text": "Design and implement a comprehensive backup and recovery strategy. Consider different backup types (full, incremental), retention policies, backup verification, and recovery testing. Include data consistency checks and point-in-time recovery capabilities.",
+        "title": "Backup Strategy",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement advanced caching patterns with cache invalidation strategies. Design multi-level caching, implement cache coherence protocols, handle cache stampede, and set up cache warming. Consider distributed caching scenarios and eventual consistency.",
+        "title": "Advanced Caching",
+        "category": "Performance"
+    },
+    {
+        "text": "Design and implement feature flags and A/B testing infrastructure. Set up feature toggle management, implement gradual rollouts, handle feature flag dependencies, and integrate analytics. Consider performance impact and technical debt management.",
+        "title": "Feature Flags",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement comprehensive API versioning and deprecation strategy. Design version management, handle breaking changes, implement API evolution, and manage client migrations. Include deprecation notices, sunset policies, and migration documentation.",
+        "title": "API Lifecycle",
+        "category": "API Design"
+    },
+    {
+        "text": "Design and implement a zero-downtime deployment strategy. Set up blue-green deployments or canary releases, handle database migrations, manage static assets, and implement rollback procedures. Consider session management and cache invalidation during deployment.",
+        "title": "Zero Downtime Deploy",
+        "category": "DevOps"
+    },
+    {
+        "text": "Implement serverless architecture patterns using cloud functions. Design event-driven serverless workflows, handle cold starts, implement proper error handling, and optimize function execution time. Consider cost optimization, monitoring, and local development setup.",
+        "title": "Serverless Patterns",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design and implement a microservices communication strategy. Set up service discovery, implement circuit breakers, handle distributed tracing, and manage service contracts. Consider cross-cutting concerns like authentication, logging, and monitoring across services.",
+        "title": "Microservices Communication",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement progressive web app (PWA) features. Set up service workers, implement offline functionality, handle push notifications, and manage app shell architecture. Consider installability, background sync, and performance optimization.",
+        "title": "PWA Implementation",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design and implement real-time analytics processing. Set up stream processing, implement data aggregation, handle time-window operations, and manage state. Consider exactly-once processing, fault tolerance, and scaling strategies.",
+        "title": "Real-time Analytics",
+        "category": "Performance"
+    },
+    {
+        "text": "Implement advanced security patterns including zero-trust architecture. Set up identity and access management, implement mutual TLS, manage secrets, and handle security monitoring. Consider compliance requirements and security audit trails.",
+        "title": "Zero Trust Security",
+        "category": "Security"
+    },
+    {
+        "text": "Design and implement a distributed caching strategy with Redis. Set up Redis clusters, implement cache patterns, handle failover scenarios, and optimize memory usage. Consider data persistence, eviction policies, and monitoring.",
+        "title": "Redis Implementation",
+        "category": "Performance"
+    },
+    {
+        "text": "Implement GraphQL subscriptions and real-time updates. Set up WebSocket transport, handle subscription lifecycle, implement proper authorization, and manage subscription state. Consider scalability and connection management.",
+        "title": "GraphQL Subscriptions",
+        "category": "API Design"
+    },
+    {
+        "text": "Design and implement a comprehensive monitoring and alerting strategy using Prometheus and Grafana. Set up metrics collection, design dashboards, implement alerting rules, and handle alert notifications. Consider SLOs, error budgets, and capacity planning.",
+        "title": "Monitoring Strategy",
+        "category": "DevOps"
+    },
+    {
+        "text": "Implement advanced frontend performance optimization techniques. Set up code splitting, implement lazy loading, optimize bundle size, and manage resource loading. Consider Core Web Vitals, runtime performance, and mobile optimization.",
+        "title": "Frontend Performance",
+        "category": "Performance"
+    },
+    {
+        "text": "Design and implement a service mesh architecture using Istio. Set up traffic management, implement security policies, handle observability, and manage service configuration. Consider multicluster deployment, canary releases, and fault injection testing.",
+        "title": "Service Mesh",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design and implement infrastructure as code using Terraform. Set up cloud resources, implement state management, handle secret management, and establish module structure. Consider multi-environment deployments, compliance requirements, and cost optimization strategies.",
+        "title": "Infrastructure as Code",
+        "category": "DevOps"
+    },
+    {
+        "text": "Implement machine learning model deployment pipeline. Set up model serving, handle model versioning, implement A/B testing for models, and manage feature stores. Consider model monitoring, drift detection, and retraining strategies.",
+        "title": "ML Pipeline",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design and implement a data lake architecture. Set up data ingestion, implement data cataloging, handle data governance, and manage data transformation pipelines. Consider data quality, schema evolution, and compliance requirements.",
+        "title": "Data Lake Design",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement GitOps workflow for continuous deployment. Set up declarative infrastructure, implement automated reconciliation, handle drift detection, and manage secrets. Consider multi-cluster management, rollback strategies, and security policies.",
+        "title": "GitOps Implementation",
+        "category": "DevOps"
+    },
+    {
+        "text": "Design and implement edge computing architecture. Set up edge devices, implement data synchronization, handle offline operations, and manage device updates. Consider network constraints, security requirements, and scalability challenges.",
+        "title": "Edge Computing",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement blockchain integration patterns. Set up smart contract deployment, implement transaction handling, manage wallet integration, and handle event listening. Consider gas optimization, security best practices, and testing strategies.",
+        "title": "Blockchain Integration",
+        "category": "Architecture"
+    },
+    {
+        "text": "Design and implement IoT device management platform. Set up device registration, implement telemetry handling, manage device updates, and handle device authentication. Consider scalability, security, and real-time processing requirements.",
+        "title": "IoT Platform",
+        "category": "Architecture"
+    },
+    {
+        "text": "Implement advanced authentication patterns using biometrics. Set up biometric validation, implement secure storage, handle fallback mechanisms, and manage user enrollment. Consider privacy requirements, security standards, and user experience.",
+        "title": "Biometric Auth",
+        "category": "Security"
+    },
+    {
+        "text": "Design and implement quantum-resistant cryptography. Implement post-quantum algorithms, handle key management, upgrade existing cryptographic systems, and manage transition periods. Consider compatibility, performance impact, and security assurance.",
+        "title": "Quantum Cryptography",
+        "category": "Security"
+    },
+    {
+        "text": "Implement advanced DevSecOps practices. Set up security scanning in CI/CD, implement policy as code, handle vulnerability management, and establish security metrics. Consider compliance automation, threat modeling, and security training requirements.",
+        "title": "DevSecOps",
+        "category": "DevOps"
+    }
+]
