@@ -4,7 +4,8 @@ export function getSidebarHtml(
     webview: vscode.Webview,
     extensionUri: vscode.Uri,
     nonce: string,
-    renderPromptList: string
+    renderPromptList: string,
+    renderContextPrompts: string
 ): string {
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'style.css'));
 
@@ -33,6 +34,21 @@ export function getSidebarHtml(
 <body>
     <div class="sidebar-container">
         <div class="sections-wrapper">
+            <!-- Context-Aware Prompts Section -->
+            <div class="main-section-container">
+                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                    <span class="section-collapse-icon">▼</span>
+                    <h1 class="header-title">Context-Aware Prompts</h1>
+                    <button id="refresh-context" class="collapse-all-button" title="Refresh context">↻</button>
+                </div>
+                <div class="section-content main-section-content">
+                    <div id="context-aware-prompts" class="prompt-list-container">
+                        ${renderContextPrompts}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Original Prompt Library Section -->
             <div class="main-section-container">
                 <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
                     <span class="section-collapse-icon">▼</span>
@@ -172,6 +188,40 @@ export function getSidebarHtml(
                 }
             });
         });
+
+        // Refresh context prompts button
+        document.getElementById('refresh-context')?.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering section collapse
+            vscode.postMessage({ type: 'refreshContext' });
+        });
+
+        // Handle context-aware prompts updates
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if (message.type === 'updateContextPrompts') {
+                const contextPromptsContainer = document.getElementById('context-aware-prompts');
+                if (contextPromptsContainer) {
+                    contextPromptsContainer.innerHTML = message.html;
+                    // Re-attach event listeners for new prompt items
+                    attachCopyButtonListeners(contextPromptsContainer);
+                }
+            }
+        });
+
+        // Helper function to attach event listeners to copy buttons
+        function attachCopyButtonListeners(container) {
+            container.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const promptText = button.closest('.prompt-item')?.querySelector('.prompt-text')?.textContent;
+                    if (promptText) {
+                        vscode.postMessage({ type: 'copy', value: promptText });
+                        button.classList.add('copied');
+                        setTimeout(() => button.classList.remove('copied'), 1000);
+                    }
+                });
+            });
+        }
 
         // Search functionality
         const searchInput = document.getElementById('search');

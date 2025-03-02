@@ -29,6 +29,15 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	// Register command to refresh context-aware prompts
+	context.subscriptions.push(
+		vscode.commands.registerCommand('prompt-playbook.refreshContext', () => {
+			if (sidebarProvider.view) {
+				sidebarProvider.view.webview.postMessage({ type: 'refreshContext' });
+			}
+		})
+	);
+
 	// Register enhance prompt command using GitHub models
 	context.subscriptions.push(
 		vscode.commands.registerCommand('prompt-playbook.enhancePrompt', async (userQuery: string, token?: vscode.CancellationToken) => {

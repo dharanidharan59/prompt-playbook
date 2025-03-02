@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { getSidebarHtml } from './html/sidebarhtml';
+import { ContextAnalyzer, ContextPrompt } from './contextAnalyzer';
 
 interface Prompt {
   title: string;
@@ -33,6 +34,8 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'prompt-playbook.sidebarView';
   private _view?: vscode.WebviewView;
   private _prompts: Prompt[] = [];
+  private _contextPrompts: ContextPrompt[] = [];
+  private _contextUpdateTimeout?: NodeJS.Timeout;
 
   // Add getter for view property
   public get view(): vscode.WebviewView | undefined {
@@ -41,6 +44,21 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._prompts = this.loadPrompts();
+
+    // Listen for editor changes to update context
+    vscode.window.onDidChangeActiveTextEditor(() => this.scheduleContextUpdate());
+    vscode.window.onDidChangeTextEditorSelection(() => this.scheduleContextUpdate());
+  }
+
+  private scheduleContextUpdate() {
+    // Debounce the context update to avoid excessive processing
+    if (this._contextUpdateTimeout) {
+      clearTimeout(this._contextUpdateTimeout);
+    }
+
+    this._contextUpdateTimeout = setTimeout(() => {
+      this.updateContextPrompts();
+    }, 1000);
   }
 
   private loadPrompts(): Prompt[] {
@@ -84,14 +102,21 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
         case 'enhancePrompt':
           await this.enhanceWithAI(data.value);
           break;
+        case 'refreshContext':
+          await this.updateContextPrompts();
+          break;
       }
     });
+
+    // Initial update of context prompts
+    this.updateContextPrompts();
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
     const nonce = getNonce();
     const renderedPromptList = this.renderPromptList();
-    return getSidebarHtml(webview, this._extensionUri, nonce, renderedPromptList);
+    const renderedContextPrompts = this.renderContextPrompts();
+    return getSidebarHtml(webview, this._extensionUri, nonce, renderedPromptList, renderedContextPrompts);
   }
 
   private renderPromptList(): string {
@@ -114,6 +139,27 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
                 </div>
             </div>`;
     }).join('');
+  }
+
+  private renderContextPrompts(): string {
+    if (!this._contextPrompts.length) {
+      return '<div class="no-context">No context-aware prompts available. Open a file to see relevant prompts.</div>';
+    }
+
+    return this._contextPrompts.map(prompt => `
+      <div class="prompt-item">
+          <div class="prompt-header">
+              <div class="prompt-title">${this.escapeHtml(prompt.title)}</div>
+              <button class="copy-button" title="Copy to clipboard">
+                  <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path fill="currentColor" d="M4 4h8v8H4z"/>
+                      <path fill="currentColor" d="M12 2H2v12h2v2h12V6h-2V2zm1 13H5V5h8v10zm1-11v1h1v9H7v-1H3V3h10z"/>
+                  </svg>
+              </button>
+          </div>
+          <div class="prompt-text">${this.escapeHtml(prompt.text)}</div>
+      </div>`
+    ).join('');
   }
 
   private renderPromptItem(prompt: Prompt): string {
@@ -139,6 +185,26 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  private async updateContextPrompts(): Promise<void> {
+    try {
+      const context = ContextAnalyzer.getEditorContext();
+      this._contextPrompts = ContextAnalyzer.generateContextPrompts(context);
+
+      if (!this._view) {
+        return;
+      }
+
+      const renderedContextPrompts = this.renderContextPrompts();
+
+      this._view.webview.postMessage({
+        type: 'updateContextPrompts',
+        html: renderedContextPrompts
+      });
+    } catch (error) {
+      console.error('Error updating context prompts:', error);
+    }
   }
 
   private async enhanceWithAI(userPrompt: string): Promise<void> {
