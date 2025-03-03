@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { PromptSidebarProvider } from './promptSidebar';
+import { ContextAnalyzer } from './contextAnalyzer';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -31,9 +32,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register command to refresh context-aware prompts
 	context.subscriptions.push(
-		vscode.commands.registerCommand('prompt-playbook.refreshContext', () => {
+		vscode.commands.registerCommand('prompt-playbook.refreshContext', async () => {
 			if (sidebarProvider.view) {
-				sidebarProvider.view.webview.postMessage({ type: 'refreshContext' });
+				try {
+					const currentContext = await ContextAnalyzer.getCurrentContext();
+					const suggestions = await ContextAnalyzer.analyzeContext(currentContext);
+					sidebarProvider.view.webview.postMessage({
+						type: 'refreshContext',
+						suggestions: suggestions
+					});
+				} catch (error) {
+					console.error('Context analysis error:', error);
+					vscode.window.showErrorMessage('Failed to analyze context');
+				}
 			}
 		})
 	);

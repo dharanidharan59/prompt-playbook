@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ModelManager } from './modelManager';
 
 // Cached context to avoid excessive reanalysis
 let cachedContext: EditorContext | null = null;
@@ -354,13 +355,17 @@ export class ContextAnalyzer {
             let match;
 
             while ((match = importRegex.exec(text)) !== null) {
-                if (match[1]) imports.push(match[1]);
+                if (match[1]) {
+                    imports.push(match[1]);
+                }
             }
 
             // Match require statements
             const requireRegex = /(?:const|let|var)\s+(?:{[^}]*}|[^{;]*)?\s*=\s*require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
             while ((match = requireRegex.exec(text)) !== null) {
-                if (match[1]) imports.push(match[1]);
+                if (match[1]) {
+                    imports.push(match[1]);
+                }
             }
         } else if (languageId === 'python') {
             // Match Python imports
@@ -368,8 +373,12 @@ export class ContextAnalyzer {
             let match;
 
             while ((match = importRegex.exec(text)) !== null) {
-                if (match[1]) imports.push(match[1]);
-                if (match[2]) imports.push(match[2]);
+                if (match[1]) {
+                    imports.push(match[1]);
+                }
+                if (match[2]) {
+                    imports.push(match[2]);
+                }
             }
         }
 
@@ -395,9 +404,9 @@ export class ContextAnalyzer {
     }
 
     /**
-     * Generate context-aware prompts based on editor context
+     * Generate context-aware prompts based on editor context using AI
      */
-    static generateContextPrompts(context: EditorContext | null): ContextPrompt[] {
+    static async generateContextPrompts(context: EditorContext | null): Promise<ContextPrompt[]> {
         // If no context, return empty array
         if (!context) {
             cachedContext = null;
@@ -405,56 +414,153 @@ export class ContextAnalyzer {
             return [];
         }
 
-        // Check if we can use cache (within 1 second and no selection change)
+        // Check if we can use cache (within 5 seconds and no selection change)
         const now = Date.now();
-        if (cachedContext && 
+        if (cachedContext &&
             this.areContextsSimilar(context, cachedContext) &&
-            now - lastAnalysisTimestamp < 1000) {
+            now - lastAnalysisTimestamp < 5000) {
             return cachedPrompts;
         }
 
-        // Always clear previous prompts when context changes significantly
-        const prompts: ContextPrompt[] = [];
+        try {
+            // Generate AI-powered context prompts
+            const prompts = await this.generateAIPrompts(context);
 
-        // If there's selected text, prioritize selection-based prompts
-        if (context.selectedText && context.selectedText.trim() !== '') {
-            this.addSelectionBasedPrompts(prompts, context);
-            
-            // Add language-specific prompts for selection
-            this.addLanguageSpecificPrompts(prompts, context);
-        } 
-        // Otherwise analyze the cursor position, file, and other context
-        else {
-            // Add syntax-based prompts for current line
-            if (context.syntaxType) {
-                this.addSyntaxBasedPrompts(prompts, context);
+            // Only update cache if we got valid results
+            if (prompts && prompts.length > 0) {
+                cachedContext = context;
+                cachedPrompts = prompts;
+                lastAnalysisTimestamp = now;
             }
 
-            // Add line-based prompts for cursor position
-            this.addLineBasedPrompts(prompts, context);
-            
-            // Add file-based prompts
-            this.addFileBasedPrompts(prompts, context);
-            
-            // Add function/class-based prompts for current scope
-            this.addFunctionClassPrompts(prompts, context);
-            
-            // Add language-specific prompts as fallback
-            this.addLanguageSpecificPrompts(prompts, context);
+            return prompts;
+        } catch (error) {
+            console.error('Error generating AI context prompts:', error);
+
+            // Fallback to empty array on error
+            return [];
         }
+    }
 
-        // Sort by confidence score
-        const sortedPrompts = prompts
-            .sort((a, b) => b.confidence - a.confidence)
-            // Ensure we have a reasonable number of prompts but not too many
-            .slice(0, 15);
+    /**
+     * Generate prompts using GitHub Models based on the current context
+     */
+    private static async generateAIPrompts(context: EditorContext): Promise<ContextPrompt[]> {
+        try {
+            const chatModel = await ModelManager.getChatModel({ 
+                family: "gpt-4",
+                retryCount: 3,
+                timeout: 5000
+            });
 
-        // Update cache
-        cachedContext = context;
-        cachedPrompts = sortedPrompts;
-        lastAnalysisTimestamp = now;
+            if (!chatModel) {
+                console.error('No GitHub models available after retries');
+                return [];
+            }
 
-        return sortedPrompts;
+            // Construct a concise context object with only the necessary information
+            const contextData = {
+                language: context.languageId,
+                selectedText: context.selectedText ?
+                    (context.selectedText.length > 1000 ?
+                        context.selectedText.substring(0, 1000) + "..." :
+                        context.selectedText) :
+                    "",
+                currentLine: context.cursorLineText,
+                filename: context.fileName,
+                extension: context.fileExtension,
+                function: context.currentFunction,
+                class: context.currentClass,
+                syntaxType: context.syntaxType,
+            };
+
+            // Create the system message to instruct the model
+            const systemMessage = vscode.LanguageModelChatMessage.Assistant(
+                `You are an AI coding assistant that suggests helpful prompts based on code context.
+                Analyze the provided code context and generate 5-10 relevant prompt suggestions.
+                Each prompt should have:
+                1. A concise title (5 words or less)
+                2. The prompt text (complete, ready-to-use prompt)
+                3. A confidence score (0-100) indicating relevance
+                4. Optional tags (keywords related to the prompt)
+                5. A source indicating what triggered this prompt (e.g., 'selection', 'function', 'file', 'language')
+                
+                Format your response as parseable JSON like:
+                [
+                  {
+                    "title": "Brief title",
+                    "text": "Complete prompt text ready to use",
+                    "confidence": 95,
+                    "tags": ["tag1", "tag2"],
+                    "source": "selection"
+                  }
+                ]`
+            );
+
+            // Create the user message with the context
+            const userMessage = vscode.LanguageModelChatMessage.User(
+                `Please analyze this code context and generate relevant prompt suggestions:
+                ${JSON.stringify(contextData, null, 2)}
+                
+                ${context.selectedText ? `Selected code:\n\`\`\`${context.languageId}\n${contextData.selectedText}\n\`\`\`` : ""}
+                ${!context.selectedText && context.cursorLineText ? `Current line:\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\`` : ""}
+
+                Return only valid JSON that can be parsed.`
+            );
+
+            // Send the request with a timeout
+            const messages = [systemMessage, userMessage];
+
+            // Create a cancellation token source with a timeout
+            const tokenSource = new vscode.CancellationTokenSource();
+            setTimeout(() => tokenSource.cancel(), 15000); // 15-second timeout
+
+            const response = await chatModel.sendRequest(messages, {}, tokenSource.token);
+
+            // Parse the response to get prompts
+            let responseText = '';
+            for await (const chunk of response.text) {
+                responseText += chunk;
+            }
+
+            // Extract JSON from response text (in case there's any extra text)
+            const jsonMatch = responseText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+            if (!jsonMatch) {
+                console.error('Could not extract JSON from response:', responseText);
+                return [];
+            }
+
+            const jsonContent = jsonMatch[0];
+
+            try {
+                const promptsFromAI = JSON.parse(jsonContent) as ContextPrompt[];
+
+                // Validate and ensure each prompt has the required properties
+                const validPrompts = promptsFromAI.filter(p =>
+                    typeof p.title === 'string' &&
+                    typeof p.text === 'string' &&
+                    typeof p.confidence === 'number'
+                ).map(p => ({
+                    ...p,
+                    // Ensure confidence is within 0-100 range
+                    confidence: Math.min(100, Math.max(0, p.confidence)),
+                    // Add default source if missing
+                    source: p.source || 'ai'
+                }));
+
+                return validPrompts;
+            } catch (parseError) {
+                console.error('Error parsing AI response:', parseError);
+                console.error('Response text:', responseText);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error generating prompts with AI:', error);
+            if (error instanceof Error) {
+                vscode.window.showErrorMessage(`Failed to generate prompts: ${error.message}`);
+            }
+            return [];
+        }
     }
 
     /**
@@ -464,16 +570,16 @@ export class ContextAnalyzer {
         // If selection status changed, contexts are not similar
         const hasSelection1 = context1.selectedText && context1.selectedText.trim() !== '';
         const hasSelection2 = context2.selectedText && context2.selectedText.trim() !== '';
-        
+
         if (hasSelection1 !== hasSelection2) {
             return false;
         }
-        
+
         // If both have selections, they must match exactly
         if (hasSelection1 && hasSelection2 && context1.selectedText !== context2.selectedText) {
             return false;
         }
-        
+
         // If no selections, check if other context elements match
         return context1.languageId === context2.languageId &&
             context1.fileName === context2.fileName &&
@@ -482,440 +588,46 @@ export class ContextAnalyzer {
             context1.cursorLineText === context2.cursorLineText;
     }
 
-    private static addSelectionBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        const selection = context.selectedText;
-        if (!selection || selection.trim() === '') return;
-
-        const lang = context.languageId;
-        const lineCount = selection.split('\n').length;
-
-        // Add selection-specific prompts with higher confidence
-        prompts.push({
-            title: 'Explain Selected Code',
-            text: `Explain what the following ${lang} code does in detail:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-            confidence: 98,
-            source: 'selection'
-        });
-
-        prompts.push({
-            title: 'Refactor Selected Code',
-            text: `Refactor this ${lang} code to improve readability and maintainability:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-            confidence: 95,
-            source: 'selection'
-        });
-
-        prompts.push({
-            title: 'Optimize Selected Code',
-            text: `Optimize this code for better performance while maintaining readability:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-            confidence: 92,
-            source: 'selection'
-        });
-
-        // For multi-line selections, add test generation prompt
-        if (lineCount > 1) {
-            prompts.push({
-                title: 'Generate Tests for Selection',
-                text: `Write comprehensive unit tests for this ${lang} code:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-                confidence: 90,
-                source: 'selection'
-            });
-        }
-
-        // For larger blocks of code, suggest documentation
-        if (selection.length > 100 || lineCount > 5) {
-            prompts.push({
-                title: 'Document Selected Code',
-                text: `Add comprehensive documentation to this ${lang} code:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-                confidence: 88,
-                source: 'selection'
-            });
-        }
-
-        // Add a security review prompt for non-trivial selections
-        if (selection.length > 50) {
-            prompts.push({
-                title: 'Security Review',
-                text: `Review this code for security vulnerabilities and suggest improvements:\n\n\`\`\`${lang}\n${selection}\n\`\`\``,
-                confidence: 85,
-                source: 'selection'
-            });
-        }
-    }
-
-    private static addLanguageSpecificPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        const lang = context.languageId;
-        const codeSnippet = context.selectedText || context.cursorLineText;
-
-        // Add common prompts for all languages
-        prompts.push({
-            title: 'Explain This Code',
-            text: `Explain what the following ${lang} code does in detail:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-            confidence: context.selectedText ? 95 : 80
-        });
-        
-        prompts.push({
-            title: 'Optimize This Code',
-            text: `Optimize the following ${lang} code for better performance and readability:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-            confidence: 92
-        });
-        
-        prompts.push({
-            title: 'Find Bugs',
-            text: `Review this ${lang} code for potential bugs, edge cases, or errors:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-            confidence: 89
-        });
-
-        // Language-specific prompts
-        switch (lang) {
-            case 'typescript':
-            case 'javascript':
-                prompts.push({
-                    title: 'Add Types',
-                    text: `Add TypeScript type definitions to this code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 88
-                });
-                
-                prompts.push({
-                    title: 'Improve Error Handling',
-                    text: `Add proper error handling to this ${lang} code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 85
-                });
-                
-                prompts.push({
-                    title: 'Convert to Modern Syntax',
-                    text: `Convert this code to use modern ${lang === 'typescript' ? 'TypeScript' : 'JavaScript'} features:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 84
-                });
-                
-                prompts.push({
-                    title: 'Add Documentation',
-                    text: `Add comprehensive JSDoc comments to this code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 82
-                });
-                
-                prompts.push({
-                    title: 'Test Cases',
-                    text: `Generate unit tests for this ${lang} code using Jest:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 80
-                });
-                
-                prompts.push({
-                    title: 'Functional Version',
-                    text: `Rewrite this code using functional programming principles:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 75
-                });
-                
-                prompts.push({
-                    title: 'Security Review',
-                    text: `Review this code for security vulnerabilities and suggest improvements:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 78
-                });
-                break;
-
-            case 'python':
-                prompts.push({
-                    title: 'Add Type Hints',
-                    text: `Add Python type hints to this code:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 90
-                });
-                
-                prompts.push({
-                    title: 'Convert to List Comprehension',
-                    text: `Rewrite this code using list comprehensions where appropriate:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 86
-                });
-                
-                prompts.push({
-                    title: 'Add Docstrings',
-                    text: `Add PEP-compliant docstrings to this Python code:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 85
-                });
-                
-                prompts.push({
-                    title: 'Test with Pytest',
-                    text: `Create pytest test cases for this code:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 83
-                });
-                
-                prompts.push({
-                    title: 'Make More Pythonic',
-                    text: `Rewrite this code to be more Pythonic following best practices:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 84
-                });
-                
-                prompts.push({
-                    title: 'Convert to OOP',
-                    text: `Convert this code to use object-oriented programming principles:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 80
-                });
-                
-                prompts.push({
-                    title: 'Add Exception Handling',
-                    text: `Add proper exception handling to this Python code:\n\n\`\`\`python\n${codeSnippet}\n\`\`\``,
-                    confidence: 82
-                });
-                break;
-
-            case 'html':
-                prompts.push({
-                    title: 'Improve Accessibility',
-                    text: `Add accessibility attributes to improve this HTML:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 90
-                });
-                
-                prompts.push({
-                    title: 'Add Semantic Tags',
-                    text: `Convert this HTML to use semantic HTML5 tags:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 88
-                });
-                
-                prompts.push({
-                    title: 'Add Microdata',
-                    text: `Add schema.org microdata to this HTML for better SEO:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 83
-                });
-                
-                prompts.push({
-                    title: 'Add Form Validation',
-                    text: `Add client-side form validation to this HTML form:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 85
-                });
-                
-                prompts.push({
-                    title: 'Convert to Responsive',
-                    text: `Make this HTML responsive with appropriate meta tags and CSS classes:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 84
-                });
-                
-                prompts.push({
-                    title: 'Optimize for Performance',
-                    text: `Optimize this HTML for better performance (defer scripts, preload, etc.):\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 82
-                });
-                
-                prompts.push({
-                    title: 'Add Aria Roles',
-                    text: `Add appropriate ARIA roles and attributes to this HTML:\n\n\`\`\`html\n${codeSnippet}\n\`\`\``,
-                    confidence: 86
-                });
-                break;
-
-            case 'css':
-                prompts.push({
-                    title: 'Optimize CSS',
-                    text: `Optimize this CSS for performance and maintainability:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 88
-                });
-                
-                prompts.push({
-                    title: 'Convert to Flexbox',
-                    text: `Convert this CSS to use Flexbox layout:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 85
-                });
-                
-                prompts.push({
-                    title: 'Convert to Grid',
-                    text: `Convert this CSS to use CSS Grid layout:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 84
-                });
-                
-                prompts.push({
-                    title: 'Add Media Queries',
-                    text: `Add media queries to make this CSS responsive:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 86
-                });
-                
-                prompts.push({
-                    title: 'Use CSS Variables',
-                    text: `Refactor this CSS to use CSS custom properties (variables):\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 82
-                });
-                
-                prompts.push({
-                    title: 'Add Dark Mode',
-                    text: `Add dark mode support to this CSS using prefers-color-scheme:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 80
-                });
-                
-                prompts.push({
-                    title: 'Optimize Animations',
-                    text: `Optimize CSS animations for performance and smoothness:\n\n\`\`\`css\n${codeSnippet}\n\`\`\``,
-                    confidence: 78
-                });
-                break;
-
-            default:
-                // For other languages, add generic prompts
-                prompts.push({
-                    title: 'Documentation',
-                    text: `Add comprehensive documentation to this ${lang} code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 85
-                });
-                
-                prompts.push({
-                    title: 'Best Practices',
-                    text: `Rewrite this ${lang} code following best practices:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 84
-                });
-                
-                prompts.push({
-                    title: 'Simplify Code',
-                    text: `Simplify this ${lang} code to make it more readable and maintainable:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 83
-                });
-                
-                prompts.push({
-                    title: 'Error Handling',
-                    text: `Improve error handling in this code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 82
-                });
-                
-                prompts.push({
-                    title: 'Code Review',
-                    text: `Perform a detailed code review and suggest improvements:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 86
-                });
-                
-                prompts.push({
-                    title: 'Test Cases',
-                    text: `Generate test cases for this code:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 80
-                });
-                
-                prompts.push({
-                    title: 'Performance Analysis',
-                    text: `Analyze the performance of this code and suggest optimizations:\n\n\`\`\`${lang}\n${codeSnippet}\n\`\`\``,
-                    confidence: 81
-                });
-        }
-    }
-
-    private static addSyntaxBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        // Add prompts based on detected syntax type
-        switch (context.syntaxType) {
-            case 'function_declaration':
-                prompts.push({
-                    title: 'Document Function',
-                    text: `Write documentation for this function:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 90
-                });
-                break;
-            case 'class_declaration':
-                prompts.push({
-                    title: 'Document Class',
-                    text: `Write documentation for this class:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 85
-                });
-                break;
-            case 'loop':
-                prompts.push({
-                    title: 'Optimize Loop',
-                    text: `Optimize this loop for better performance:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 75
-                });
-                break;
-            case 'conditional':
-                prompts.push({
-                    title: 'Simplify Conditional',
-                    text: `Simplify this conditional statement:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 70
-                });
-                break;
-            case 'api_endpoint':
-                prompts.push({
-                    title: 'Document API Endpoint',
-                    text: `Write documentation for this API endpoint:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 95
-                });
-                break;
-            case 'react_component':
-                prompts.push({
-                    title: 'Document React Component',
-                    text: `Write documentation for this React component:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 90
-                });
-                break;
-            case 'sql_query':
-                prompts.push({
-                    title: 'Optimize SQL Query',
-                    text: `Optimize this SQL query for better performance:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 85
-                });
-                break;
-            case 'error_handling':
-                prompts.push({
-                    title: 'Improve Error Handling',
-                    text: `Improve error handling in this code:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                    confidence: 80
-                });
-                break;
-        }
-    }
-
-    private static addLineBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        // Function detection (crude but simple)
-        if (/function|def |class |method|async/.test(context.cursorLineText)) {
-            prompts.push({
-                title: 'Document Function',
-                text: `Write documentation for this function:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                confidence: 90
-            });
-        }
-
-        // Variable detection
-        if (/const |let |var |= |: /.test(context.cursorLineText)) {
-            prompts.push({
-                title: 'Better Variable Name',
-                text: `Suggest a better name for the variable in this line:\n\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``,
-                confidence: 75
-            });
-        }
-    }
-
-    private static addFileBasedPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        if (context.fileName) {
-            prompts.push({
-                title: 'File Documentation',
-                text: `Write a comprehensive documentation header for ${context.fileName}`,
-                confidence: 70
-            });
-        }
-
-        // Test file detection
-        if (context.fileName && /test|spec/.test(context.fileName.toLowerCase())) {
-            prompts.push({
-                title: 'Add Test Cases',
-                text: `Suggest additional test cases for this test file`,
-                confidence: 85
-            });
-        }
-    }
-
-    private static addFunctionClassPrompts(prompts: ContextPrompt[], context: EditorContext) {
-        if (context.currentFunction) {
-            prompts.push({
-                title: 'Document Function',
-                text: `Write detailed documentation for the function \`${context.currentFunction}\``,
-                confidence: 75,
-                tags: ['documentation', 'function']
-            });
-        }
-
-        if (context.currentClass) {
-            prompts.push({
-                title: 'Improve Class Design',
-                text: `Suggest improvements to the design of the class \`${context.currentClass}\``,
-                confidence: 70,
-                tags: ['design', 'class']
-            });
-        }
-    }
-
     /**
      * Clear all context-aware prompts 
      * Used when switching files or editors
      */
     static clearPrompts(): void {
         this.invalidateCache();
+    }
+
+    static async getCurrentContext(): Promise<string> {
+        let context = '';
+
+        // Get active editor content
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const document = editor.document;
+            context += `Current file (${document.languageId}): ${document.getText()}\n`;
+        }
+
+        // Get workspace context
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders) {
+            context += `Workspace: ${workspaceFolders[0].name}\n`;
+        }
+
+        return context || 'No context available';
+    }
+
+    static async analyzeContext(context: string): Promise<string[]> {
+        // Basic analysis for now - extract file type and key terms
+        const fileTypeMatch = context.match(/Current file \((.*?)\):/);
+        const fileType = fileTypeMatch ? fileTypeMatch[1] : '';
+
+        const suggestions = [
+            `Write a function in ${fileType}`,
+            `Debug this ${fileType} code`,
+            `Optimize this ${fileType} code`,
+            `Explain this ${fileType} code`,
+            `Add documentation to this ${fileType} code`
+        ];
+
+        return suggestions;
     }
 }

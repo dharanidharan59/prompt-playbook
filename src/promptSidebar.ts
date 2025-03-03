@@ -203,12 +203,20 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
 
   private async updateContextPrompts(): Promise<void> {
     try {
-      const context = ContextAnalyzer.getEditorContext();
-      this._contextPrompts = ContextAnalyzer.generateContextPrompts(context);
-
       if (!this._view) {
         return;
       }
+
+      // Show loading state
+      this._view.webview.postMessage({
+        type: 'updateContextPrompts',
+        html: '<div class="no-context">Loading context-aware suggestions...</div>'
+      });
+
+      const context = ContextAnalyzer.getEditorContext();
+
+      // The method is now async
+      this._contextPrompts = await ContextAnalyzer.generateContextPrompts(context);
 
       const renderedContextPrompts = this.renderContextPrompts();
 
@@ -218,6 +226,14 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       });
     } catch (error) {
       console.error('Error updating context prompts:', error);
+
+      // Show error message in the UI
+      if (this._view) {
+        this._view.webview.postMessage({
+          type: 'updateContextPrompts',
+          html: '<div class="no-context">Error loading context-aware suggestions. Please try again.</div>'
+        });
+      }
     }
   }
 
