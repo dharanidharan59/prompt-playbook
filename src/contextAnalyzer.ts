@@ -29,9 +29,26 @@ export interface EditorContext {
 export interface ContextPrompt {
     title: string;
     text: string;
-    confidence: number; // 0-100 indicating relevance
+    priority: {
+        level: 'Critical' | 'High' | 'Medium' | 'Low';
+        reason: string;
+        deadline?: string;    // Suggested timeframe (e.g., "Before deployment", "Within sprint")
+        dependencies?: string[]; // What needs to be done first
+    };
+    complexity: {
+        score: number;      // 1-5 scale
+        estimate: string;   // Time estimate (e.g., "~15min", "1-2 hours")
+        factors: string[];  // What makes it complex/simple
+    };
+    impact: {
+        score: number;      // 1-5 scale
+        areas: string[];    // Areas of improvement (e.g., "performance", "security")
+        benefits: string[]; // Specific benefits
+    };
+    confidence?: number;    // 0-100 confidence score
     tags?: string[];
     source?: string; // Indicates what triggered this prompt (e.g., 'selection', 'function', 'file')
+    category?: string;
 }
 
 interface CodePattern {
@@ -447,7 +464,7 @@ export class ContextAnalyzer {
      */
     private static async generateAIPrompts(context: EditorContext): Promise<ContextPrompt[]> {
         try {
-            const chatModel = await ModelManager.getChatModel({ 
+            const chatModel = await ModelManager.getChatModel({
                 family: "gpt-4",
                 retryCount: 3,
                 timeout: 5000
@@ -479,33 +496,48 @@ export class ContextAnalyzer {
 
             // Create the system message to instruct the model
             const systemMessage = vscode.LanguageModelChatMessage.Assistant(
-                `You are an expert software developer and coding assistant. Generate detailed, practical prompts that developers would find genuinely useful.
-                Focus on prompts that help with:
-                1. Code improvement and best practices
-                2. Performance optimization and scalability
-                3. Security and error handling
-                4. Testing and debugging strategies
-                5. Documentation and maintainability
-                6. Design patterns and architecture
-                7. Refactoring suggestions
-                8. Developer workflow optimization
-
-                For each prompt:
-                - Be specific and actionable
-                - Consider the full development context
-                - Include language-specific best practices
-                - Reference relevant design patterns or principles
-                - Consider both immediate and long-term code quality
+                `You are an expert software developer and coding assistant. Generate detailed, practical prompts with implementation priority and impact analysis.
                 
-                Format as parseable JSON:
+                For each prompt, provide:
+                1. Basic prompt information (title, text)
+                2. Action Priority:
+                   - Level (Critical/High/Medium/Low)
+                   - Reason for priority level
+                   - Suggested timeline/deadline
+                   - Any dependencies that should be handled first
+                3. Complexity analysis:
+                   - Score (1-5, where 1 is simplest)
+                   - Time estimate
+                   - Complexity factors
+                4. Impact analysis:
+                   - Score (1-5)
+                   - Areas affected
+                   - Expected benefits
+                
+                Format as JSON:
                 [
                   {
-                    "title": "Brief descriptive title",
-                    "text": "Detailed, specific prompt with clear objectives",
-                    "confidence": 0-100,
-                    "tags": ["relevant", "technical", "tags"],
+                    "title": "Brief title",
+                    "text": "Detailed prompt",
+                    "priority": {
+                      "level": "High",
+                      "reason": "Critical for performance",
+                      "deadline": "Before next release",
+                      "dependencies": ["Refactor X", "Update Y"]
+                    },
+                    "complexity": {
+                      "score": 1-5,
+                      "estimate": "time estimate",
+                      "factors": ["factor1", "factor2"]
+                    },
+                    "impact": {
+                      "score": 1-5,
+                      "areas": ["area1", "area2"],
+                      "benefits": ["benefit1", "benefit2"]
+                    },
+                    "tags": ["tag1", "tag2"],
                     "source": "source_type",
-                    "category": "improvement|security|performance|etc"
+                    "category": "category_type"
                   }
                 ]`
             );
@@ -515,8 +547,8 @@ export class ContextAnalyzer {
                 `Generate practical developer prompts for this context:
                 ${JSON.stringify(contextData, null, 2)}
                 
-                ${context.selectedText ? 
-                    `Selected code:\n\`\`\`${context.languageId}\n${contextData.selectedText}\n\`\`\`` : 
+                ${context.selectedText ?
+                    `Selected code:\n\`\`\`${context.languageId}\n${contextData.selectedText}\n\`\`\`` :
                     `Current context:\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``}
 
                 Consider:
@@ -559,11 +591,9 @@ export class ContextAnalyzer {
                 const validPrompts = promptsFromAI.filter(p =>
                     typeof p.title === 'string' &&
                     typeof p.text === 'string' &&
-                    typeof p.confidence === 'number'
+                    typeof p.priority === 'object'
                 ).map(p => ({
                     ...p,
-                    // Ensure confidence is within 0-100 range
-                    confidence: Math.min(100, Math.max(0, p.confidence)),
                     // Add default source if missing
                     source: p.source || 'ai'
                 }));

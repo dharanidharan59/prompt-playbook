@@ -130,11 +130,13 @@ body {
 
 /* Input and clear button alignment */
 #search {
-    margin-bottom: 0; /* Remove bottom margin since it's now in search-controls */
+    margin-bottom: 0;
+    /* Remove bottom margin since it's now in search-controls */
 }
 
 .clear-search {
-    right: 8px; /* Keep position for clear button */
+    right: 8px;
+    /* Keep position for clear button */
 }
 
 /* Ensure dropdown appears below the search row */
@@ -1528,23 +1530,15 @@ body {
 }
 
 .prompt-confidence {
-    display: flex;
-    flex-direction: column;
-    margin-left: auto;
-    min-width: 50px;
-    position: relative;
+    display: none;
 }
 
 .confidence-bar {
-    height: 3px;
-    background-color: var(--vscode-progressBar-background);
-    border-radius: 2px;
-    margin-bottom: 2px;
+    display: none;
 }
 
 .confidence-text {
-    font-size: 9px;
-    text-align: right;
+    display: none;
 }
 
 .prompt-tags {
@@ -1583,4 +1577,139 @@ body {
 /* Adjust container to accommodate the new details */
 #context-aware-prompts .prompt-item {
     padding-bottom: 10px;
+}
+
+/* Add styles for the new complexity and impact indicators */
+.prompt-metrics {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dotted var(--vscode-panel-border);
+}
+
+.metric-box {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.complexity-score,
+.impact-score {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.score-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--vscode-charts-foreground);
+    opacity: 0.3;
+}
+
+.score-dot.filled {
+    opacity: 1;
+}
+
+.metric-detail {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    margin-top: 4px;
+}
+
+.estimate-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.impact-areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.impact-area {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--vscode-charts-blue);
+    color: var(--vscode-charts-foreground);
+    opacity: 0.8;
+}
+
+.prompt-priority {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.priority-Critical {
+    background-color: var(--vscode-errorBackground);
+    color: var(--vscode-errorForeground);
+}
+
+.priority-High {
+    background-color: var(--vscode-charts-orange);
+    color: var(--vscode-charts-foreground);
+}
+
+.priority-Medium {
+    background-color: var(--vscode-charts-yellow);
+    color: var(--vscode-charts-foreground);
+}
+
+.priority-Low {
+    background-color: var(--vscode-charts-blue);
+    color: var(--vscode-charts-foreground);
+}
+
+.priority-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.priority-reason {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.priority-timeline {
+    font-size: 9px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.dependencies-list {
+    font-size: 9px;
+    margin-top: 4px;
+    padding-left: 12px;
+}
+
+.dependency-item {
+    opacity: 0.8;
+    list-style-type: '→ ';
 }
