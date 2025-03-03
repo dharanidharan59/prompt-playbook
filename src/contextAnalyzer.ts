@@ -472,40 +472,60 @@ export class ContextAnalyzer {
                 function: context.currentFunction,
                 class: context.currentClass,
                 syntaxType: context.syntaxType,
+                imports: context.imports,
+                selectionRange: context.selectionRange,
+                documentContext: context.documentText?.substring(0, 500) // First 500 chars for context
             };
 
             // Create the system message to instruct the model
             const systemMessage = vscode.LanguageModelChatMessage.Assistant(
-                `You are an AI coding assistant that suggests helpful prompts based on code context.
-                Analyze the provided code context and generate 5-10 relevant prompt suggestions.
-                Each prompt should have:
-                1. A concise title (5 words or less)
-                2. The prompt text (complete, ready-to-use prompt)
-                3. A confidence score (0-100) indicating relevance
-                4. Optional tags (keywords related to the prompt)
-                5. A source indicating what triggered this prompt (e.g., 'selection', 'function', 'file', 'language')
+                `You are an expert software developer and coding assistant. Generate detailed, practical prompts that developers would find genuinely useful.
+                Focus on prompts that help with:
+                1. Code improvement and best practices
+                2. Performance optimization and scalability
+                3. Security and error handling
+                4. Testing and debugging strategies
+                5. Documentation and maintainability
+                6. Design patterns and architecture
+                7. Refactoring suggestions
+                8. Developer workflow optimization
+
+                For each prompt:
+                - Be specific and actionable
+                - Consider the full development context
+                - Include language-specific best practices
+                - Reference relevant design patterns or principles
+                - Consider both immediate and long-term code quality
                 
-                Format your response as parseable JSON like:
+                Format as parseable JSON:
                 [
                   {
-                    "title": "Brief title",
-                    "text": "Complete prompt text ready to use",
-                    "confidence": 95,
-                    "tags": ["tag1", "tag2"],
-                    "source": "selection"
+                    "title": "Brief descriptive title",
+                    "text": "Detailed, specific prompt with clear objectives",
+                    "confidence": 0-100,
+                    "tags": ["relevant", "technical", "tags"],
+                    "source": "source_type",
+                    "category": "improvement|security|performance|etc"
                   }
                 ]`
             );
 
             // Create the user message with the context
             const userMessage = vscode.LanguageModelChatMessage.User(
-                `Please analyze this code context and generate relevant prompt suggestions:
+                `Generate practical developer prompts for this context:
                 ${JSON.stringify(contextData, null, 2)}
                 
-                ${context.selectedText ? `Selected code:\n\`\`\`${context.languageId}\n${contextData.selectedText}\n\`\`\`` : ""}
-                ${!context.selectedText && context.cursorLineText ? `Current line:\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\`` : ""}
+                ${context.selectedText ? 
+                    `Selected code:\n\`\`\`${context.languageId}\n${contextData.selectedText}\n\`\`\`` : 
+                    `Current context:\n\`\`\`${context.languageId}\n${context.cursorLineText}\n\`\`\``}
 
-                Return only valid JSON that can be parsed.`
+                Consider:
+                - Language: ${context.languageId}
+                - Current scope: ${context.currentFunction || context.currentClass || 'global'}
+                - Syntax type: ${context.syntaxType || 'general'}
+                - File context: ${context.fileName || 'unknown'}
+                
+                Return only valid JSON with detailed, practical prompts.`
             );
 
             // Send the request with a timeout
