@@ -5,7 +5,9 @@ export function getSidebarHtml(
     extensionUri: vscode.Uri,
     nonce: string,
     renderPromptList: string,
-    renderContextPrompts: string
+    renderContextPrompts: string,
+    isAuthenticated: boolean,
+    userInfo?: any
 ): string {
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'style.css'));
 
@@ -29,85 +31,168 @@ export function getSidebarHtml(
             overflow-y: auto; /* Single scrollbar for the entire content */
             overflow-x: hidden;
         }
+
+        /* Login styles */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .github-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #2ea44f;
+            color: #ffffff;
+            border: 1px solid rgba(27, 31, 35, 0.15);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .github-button:hover {
+            background-color: #2c974b;
+        }
+
+        .github-button svg {
+            margin-right: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            background: var(--vscode-sideBarSectionHeader-background);
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .user-name {
+            flex: 1;
+            font-size: 12px;
+        }
+
+        .logout-button {
+            padding: 4px 8px;
+            font-size: 11px;
+            color: var(--vscode-button-foreground);
+            background: var(--vscode-button-background);
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar-container">
-        <div class="sections-wrapper">
-            <!-- Context-Aware Prompts Section -->
-            <div class="main-section-container">
-                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
-                    <span class="section-collapse-icon">▼</span>
-                    <h1 class="header-title">Context-Aware Prompts</h1>
-                </div>
-                <div class="section-content main-section-content">
-                    <div id="context-aware-prompts" class="prompt-list-container">
-                        ${renderContextPrompts}
+    ${!isAuthenticated ? `
+        <div class="login-container">
+            <h2>Welcome to Prompt Playbook</h2>
+            <p>Please sign in with GitHub to continue</p>
+            <button class="github-button" id="github-login">
+                <svg height="16" viewBox="0 0 16 16" width="16">
+                    <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                Sign in with GitHub
+            </button>
+        </div>
+    ` : `
+        ${userInfo ? `
+            <div class="user-info">
+                <img src="${userInfo.avatar_url}" alt="" class="user-avatar">
+                <span class="user-name">${userInfo.login}</span>
+                <button class="logout-button" id="logout">Sign Out</button>
+            </div>
+        ` : ''}
+        <div class="sidebar-container">
+            <div class="sections-wrapper">
+                <!-- Context-Aware Prompts Section -->
+                <div class="main-section-container">
+                    <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                        <span class="section-collapse-icon">▼</span>
+                        <h1 class="header-title">Context-Aware Prompts</h1>
+                    </div>
+                    <div class="section-content main-section-content">
+                        <div id="context-aware-prompts" class="prompt-list-container">
+                            ${renderContextPrompts}
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Original Prompt Library Section -->
-            <div class="main-section-container">
-                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
-                    <span class="section-collapse-icon">▼</span>
-                    <h1 class="header-title">Prompt Playbook</h1>
-                </div>
-                <div class="section-content main-section-content">
-                    <div class="search-wrapper">
-                        <div class="search-controls">
-                            <div class="typeahead-container">
-                                <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
-                                <button class="clear-search" aria-label="Clear search">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
-                                    </svg>
-                                </button>
-                                <button id="collapse-all" class="collapse-all-button"></button>
+                
+                <!-- Original Prompt Library Section -->
+                <div class="main-section-container">
+                    <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                        <span class="section-collapse-icon">▼</span>
+                        <h1 class="header-title">Prompt Playbook</h1>
+                    </div>
+                    <div class="section-content main-section-content">
+                        <div class="search-wrapper">
+                            <div class="search-controls">
+                                <div class="typeahead-container">
+                                    <input type="text" id="search" placeholder="Search prompts... (Ctrl+F)" />
+                                    <button class="clear-search" aria-label="Clear search">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill="currentColor" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
+                                        </svg>
+                                    </button>
+                                    <button id="collapse-all" class="collapse-all-button"></button>
+                                </div>
+                                <div id="typeahead-dropdown" class="typeahead-dropdown"></div>
                             </div>
-                            <div id="typeahead-dropdown" class="typeahead-dropdown"></div>
                         </div>
-                    </div>
-                    <div id="prompt-list" class="prompt-list-container">
-                        ${renderPromptList}
-                        <div id="no-results" style="display: none; text-align: center; padding: 20px;">
-                            No matching prompts found
+                        <div id="prompt-list" class="prompt-list-container">
+                            ${renderPromptList}
+                            <div id="no-results" style="display: none; text-align: center; padding: 20px;">
+                                No matching prompts found
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Add Prompt Enhancer Section -->
-            <div class="main-section-container">
-                <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
-                    <span class="section-collapse-icon">▼</span>
-                    <h1 class="header-title">Prompt Enhancer</h1>
-                </div>
-                <div class="section-content main-section-content">
-                    <div class="generate-prompt-container">
-                        <textarea id="promptInput" placeholder="Enter your prompt here to enhance it..." rows="4"></textarea>
-                        <div class="button-container">
-                            <button id="enhanceButton" class="action-button">
-                                Enhance Prompt
-                            </button>
-                            <button id="clearButton" class="action-button secondary">
-                                Clear
-                            </button>
-                        </div>
-                        <div class="enhanced-prompt" style="display: none;">
-                            <h4>Enhanced Prompt:</h4>
-                            <div id="enhancedContent"></div>
+                <!-- Add Prompt Enhancer Section -->
+                <div class="main-section-container">
+                    <div class="section-header main-section-header" role="button" tabindex="0" aria-expanded="true">
+                        <span class="section-collapse-icon">▼</span>
+                        <h1 class="header-title">Prompt Enhancer</h1>
+                    </div>
+                    <div class="section-content main-section-content">
+                        <div class="generate-prompt-container">
+                            <textarea id="promptInput" placeholder="Enter your prompt here to enhance it..." rows="4"></textarea>
                             <div class="button-container">
-                                <button id="copyEnhanced" class="action-button">
-                                    Copy Enhanced Prompt
+                                <button id="enhanceButton" class="action-button">
+                                    Enhance Prompt
                                 </button>
+                                <button id="clearButton" class="action-button secondary">
+                                    Clear
+                                </button>
+                            </div>
+                            <div class="enhanced-prompt" style="display: none;">
+                                <h4>Enhanced Prompt:</h4>
+                                <div id="enhancedContent"></div>
+                                <div class="button-container">
+                                    <button id="copyEnhanced" class="action-button">
+                                        Copy Enhanced Prompt
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    `}
 
     <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
@@ -382,6 +467,15 @@ export function getSidebarHtml(
                     }
                     break;
             }
+        });
+
+        // Auth event listeners
+        document.getElementById('github-login')?.addEventListener('click', () => {
+            vscode.postMessage({ type: 'login' });
+        });
+
+        document.getElementById('logout')?.addEventListener('click', () => {
+            vscode.postMessage({ type: 'logout' });
         });
     </script>
 </body>

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { getSidebarHtml } from './html/sidebarhtml';
 import { ContextAnalyzer, ContextPrompt } from './contextAnalyzer';
+import { AuthManager } from './authManager';
 
 interface Prompt {
   title: string;
@@ -36,6 +37,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
   private _prompts: Prompt[] = [];
   private _contextPrompts: ContextPrompt[] = [];
   private _contextUpdateTimeout?: NodeJS.Timeout;
+  private authManager: AuthManager;
 
   // Add getter for view property
   public get view(): vscode.WebviewView | undefined {
@@ -44,6 +46,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._prompts = this.loadPrompts();
+    this.authManager = AuthManager.getInstance();
 
     // Listen for editor changes to update context
     vscode.window.onDidChangeActiveTextEditor(() => this.scheduleContextUpdate());
@@ -72,7 +75,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  public resolveWebviewView(
+  public async resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
@@ -84,10 +87,31 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri]
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    // Initialize auth
+    await this.authManager.initialize();
+
+    // Get user info if authenticated
+    const userInfo = this.authManager.isAuthenticated() ? await this.authManager.getUserInfo() : null;
+
+    webviewView.webview.html = this._getHtmlForWebview(
+      webviewView.webview,
+      this.authManager.isAuthenticated(),
+      userInfo
+    );
 
     webviewView.webview.onDidReceiveMessage(async (data: any) => {
       switch (data.type) {
+        case 'login':
+          const success = await this.authManager.login();
+          if (success) {
+            const userInfo = await this.authManager.getUserInfo();
+            await this.updateWebview(true, userInfo);
+          }
+          break;
+        case 'logout':
+          await this.authManager.logout();
+          await this.updateWebview(false);
+          break;
         case 'copy':
           try {
             if (data.value) {
@@ -108,15 +132,39 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    // Initial update of context prompts
-    this.updateContextPrompts();
+    // Only update context prompts if authenticated
+    if (this.authManager.isAuthenticated()) {
+      this.updateContextPrompts();
+    }
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview): string {
+  private _getHtmlForWebview(
+    webview: vscode.Webview,
+    isAuthenticated: boolean = false,
+    userInfo: any = null
+  ): string {
     const nonce = getNonce();
     const renderedPromptList = this.renderPromptList();
     const renderedContextPrompts = this.renderContextPrompts();
-    return getSidebarHtml(webview, this._extensionUri, nonce, renderedPromptList, renderedContextPrompts);
+    return getSidebarHtml(
+      webview,
+      this._extensionUri,
+      nonce,
+      renderedPromptList,
+      renderedContextPrompts,
+      isAuthenticated,
+      userInfo
+    );
+  }
+
+  private async updateWebview(isAuthenticated: boolean, userInfo: any = null): Promise<void> {
+    if (this._view) {
+      this._view.webview.html = this._getHtmlForWebview(
+        this._view.webview,
+        isAuthenticated,
+        userInfo
+      );
+    }
   }
 
   private renderPromptList(): string {

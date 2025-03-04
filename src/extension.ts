@@ -1,10 +1,15 @@
 import * as vscode from 'vscode';
 import { PromptSidebarProvider } from './promptSidebar';
 import { ContextAnalyzer } from './contextAnalyzer';
+import { AuthManager } from './authManager';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	// Initialize AuthManager
+	const authManager = AuthManager.getInstance();
+	authManager.initialize();
+
 	const sidebarProvider = new PromptSidebarProvider(context.extensionUri);
 
 	context.subscriptions.push(

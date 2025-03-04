@@ -11,12 +11,13 @@
   "engines": {
     "vscode": "^1.97.0"
   },
+  "extensionDependencies": [
+    "GitHub.copilot"
+  ],
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -33,13 +34,12 @@
         {
           "type": "webview",
           "id": "prompt-playbook.sidebarView",
-          "name": "Prompts"
+          "name": "Prompts",
+          "contextualTitle": "Prompt Playbook"
         }
       ]
     },
-    "commands": [
-     
-    ],
+    "commands": [],
     "keybindings": [
       {
         "command": "prompt-playbook.focus",
