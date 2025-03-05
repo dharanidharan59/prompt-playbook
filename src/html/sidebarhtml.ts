@@ -236,7 +236,6 @@ export function getSidebarHtml(
                         <div id="prompt-list" class="prompt-list-container">
                             ${renderPromptList}
                             <div id="no-results" style="display: none; text-align: center; padding: 20px;">
-                                No matching prompts found
                             </div>
                         </div>
                     </div>
