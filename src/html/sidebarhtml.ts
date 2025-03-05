@@ -71,6 +71,12 @@ export function getSidebarHtml(
             padding: 8px 16px;
             border-bottom: 1px solid var(--vscode-panel-border);
             background: var(--vscode-sideBarSectionHeader-background);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-info:hover {
+            background-color: var(--vscode-list-hoverBackground);
         }
 
         .user-avatar {
@@ -84,15 +90,19 @@ export function getSidebarHtml(
             flex: 1;
             font-size: 12px;
         }
+        
+        .user-info:after {
+            content: "⋮";
+            font-size: 14px;
+            color: var(--vscode-foreground);
+            opacity: 0.7;
+        }
 
-        .logout-button {
-            padding: 4px 8px;
-            font-size: 11px;
-            color: var(--vscode-button-foreground);
-            background: var(--vscode-button-background);
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+        .logout-icon {
+            font-size: 16px;
+            margin-left: 8px;
+            color: var(--vscode-foreground);
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -110,10 +120,14 @@ export function getSidebarHtml(
         </div>
     ` : `
         ${userInfo ? `
-            <div class="user-info">
+            <div class="user-info" id="logout-container">
                 <img src="${userInfo.avatar_url}" alt="" class="user-avatar">
                 <span class="user-name">${userInfo.login}</span>
-                <button class="logout-button" id="logout">Sign Out</button>
+                <button id="logout" class="logout-button" title="Sign out">
+                    <svg class="logout-icon" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="currentColor" d="M11.992 8.994V6.996H7.995v-2h3.997V2.999l3.998 2.998-3.998 2.997zm-1.998 2.997H5.996V2.998L2 1h7.995v2.998h1V1c0-.55-.45-1-1.002-1H1.993C1.443 0 1 .45 1 1v11.372c0 .39.22.73.55.91L5.996 16v-2.016h3.998c.553 0 1-.448 1-1V7.995h-1v3.996z"/>
+                    </svg>
+                </button>
             </div>
         ` : ''}
         <div class="sidebar-container">
@@ -474,9 +488,26 @@ export function getSidebarHtml(
             vscode.postMessage({ type: 'login' });
         });
 
-        document.getElementById('logout')?.addEventListener('click', () => {
-            vscode.postMessage({ type: 'logout' });
-        });
+        // Update logout event listener to use the button
+        const logoutButton = document.getElementById('logout');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                vscode.postMessage({ type: 'logout' });
+            });
+        }
+        
+        // Add a backup handler on the container itself
+        const logoutContainer = document.getElementById('logout-container');
+        if (logoutContainer) {
+            logoutContainer.addEventListener('click', () => {
+                const confirmLogout = confirm('Are you sure you want to sign out?');
+                if (confirmLogout) {
+                    vscode.postMessage({ type: 'logout' });
+                }
+            });
+        }
     </script>
 </body>
 </html>`;

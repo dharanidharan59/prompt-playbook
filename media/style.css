@@ -1713,3 +1713,74 @@ body {
     opacity: 0.8;
     list-style-type: '→ ';
 }
+
+/* User account/logout section styles */
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    background: var(--vscode-sideBarSectionHeader-background);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.user-info:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.user-name {
+    flex: 1;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--vscode-foreground);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+    border-radius: 4px;
+}
+
+.logout-button:hover {
+    opacity: 1;
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.logout-button:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    opacity: 1;
+}
+
+.logout-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Remove any conflicting styles */
+.user-info:after {
+    content: none;
+}
+
+.user-info {
+    padding: 8px 12px;
+}

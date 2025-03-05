@@ -70,37 +70,69 @@ export class AuthManager {
 
     async logout(): Promise<void> {
         try {
-            if (this.authSession) {
-                // Clear the session from VS Code's authentication provider
-                const scopes = this.authSession.scopes;
-                await vscode.authentication.getSession('github', scopes, { clearSessionPreference: true });
-                this.authSession = undefined;
+            console.log('Starting logout process...');
+
+            // Get current session
+            const session = await vscode.authentication.getSession('github', ['user'], {
+                createIfNone: false
+            });
+
+            if (session) {
+                // Clear session preference
+                await vscode.authentication.getSession('github', ['user'], {
+                    createIfNone: false,
+                    clearSessionPreference: true
+                });
+                console.log('Cleared session preferences');
             }
+
+            // Clear our local session reference
+            this.authSession = undefined;
+
+            console.log('Logout completed successfully');
         } catch (error) {
             console.error('Logout failed:', error);
-            vscode.window.showErrorMessage('Failed to sign out. Please try again.');
+            throw error; // Let the caller handle the error
         }
     }
 
     isAuthenticated(): boolean {
-        return !!this.authSession;
+        return Boolean(this.authSession?.accessToken) &&
+            Boolean(this.authSession?.scopes?.includes('user'));
     }
 
     async getUserInfo(): Promise<any | null> {
-        if (!this.authSession) {
-            return null;
-        }
-
         try {
+            if (!this.authSession?.accessToken) {
+                return null;
+            }
+
             const response = await fetch('https://api.github.com/user', {
                 headers: {
                     'Authorization': `Bearer ${this.authSession.accessToken}`,
-                    'User-Agent': 'VSCode-Prompt-Playbook'
+                    'User-Agent': 'VSCode-Prompt-Playbook',
+                    'Accept': 'application/vnd.github.v3+json'
                 }
             });
-            return await response.json();
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // Token is invalid, clear the session
+                    this.authSession = undefined;
+                    return null;
+                }
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+
         } catch (error) {
             console.error('Error fetching user info:', error);
+            // Only clear session on auth errors
+            if (error instanceof Error && error.message.includes('401')) {
+                this.authSession = undefined;
+            }
             return null;
         }
     }

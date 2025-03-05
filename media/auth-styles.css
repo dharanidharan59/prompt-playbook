@@ -1,0 +1,38 @@
+/* Logout button specific styles */
+.logout-button {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.logout-icon {
+    font-size: 16px;
+    color: var(--vscode-foreground);
+    opacity: 0.8;
+}
+
+.user-info:hover .logout-icon {
+    opacity: 1;
+}
+
+/* Override any conflicting styles */
+.user-info:after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Fix for user info container */
+.user-info {
+    border-bottom: 2px solid var(--vscode-panel-border) !important;
+    padding: 10px 16px !important;
+}

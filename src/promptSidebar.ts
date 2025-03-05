@@ -109,8 +109,18 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
           }
           break;
         case 'logout':
-          await this.authManager.logout();
-          await this.updateWebview(false);
+          console.log('Logout message received');
+          try {
+            // Clear session before updating the UI
+            await this.authManager.logout();
+            vscode.window.showInformationMessage('Signed out successfully');
+
+            // Important: Update UI after logout
+            await this.updateWebview(false);
+          } catch (error) {
+            console.error('Logout error:', error);
+            vscode.window.showErrorMessage('Failed to sign out. Please try again.');
+          }
           break;
         case 'copy':
           try {
@@ -164,6 +174,11 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
         isAuthenticated,
         userInfo
       );
+
+      // Force a refresh of the context prompts if the user is authenticated
+      if (isAuthenticated) {
+        setTimeout(() => this.updateContextPrompts(), 500);
+      }
     }
   }
 
