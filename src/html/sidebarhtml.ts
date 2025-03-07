@@ -38,27 +38,26 @@ export function getSidebarHtml(
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: calc(100vh - 80px); /* Reduce height to account for margins */
-            margin: 40px;
-            padding: 40px;
+            min-height: calc(100vh - 120px);
+            margin: 60px 40px;
+            padding: 40px 30px;
             text-align: center;
-            background: linear-gradient(to bottom, var(--vscode-editor-background), var(--vscode-sideBar-background));
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-            max-width: calc(100% - 80px); /* Ensure container doesn't overflow */
-            width: 100%;
-            box-sizing: border-box;
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .github-button {
             display: inline-flex;
             align-items: center;
-            background-color: #2ea44f;
-            color: #ffffff;
-            border: 1px solid rgba(27, 31, 35, 0.15);
-            border-radius: 6px;
-            padding: 10px 24px;
-            font-size: 14px;
+            gap: 8px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
@@ -66,7 +65,7 @@ export function getSidebarHtml(
         }
 
         .github-button:hover {
-            background-color: #2c974b;
+            background-color: var(--vscode-button-hoverBackground);
         }
 
         .github-button svg {
@@ -114,54 +113,58 @@ export function getSidebarHtml(
         }
 
         .welcome-header {
-            margin-bottom: 32px;
-            padding: 0 20px;
+            margin-bottom: 40px;
             width: 100%;
-            max-width: 480px;
+            max-width: 400px;
         }
 
         .welcome-header h2 {
-            font-size: 1.5em;
-            margin-bottom: 8px;
-            background: linear-gradient(120deg, #2ea44f, #28a745);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: var(--vscode-foreground);
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .welcome-subtext {
-            color: var(--vscode-foreground);
-            opacity: 0.8;
-            margin: 16px 30px;
-            font-size: 1.1em;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0 0 32px 0;
         }
 
         .feature-list {
-            margin: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             width: 100%;
-            max-width: 360px;
+            max-width: 320px;
+            margin: 0 auto;
         }
 
         .feature-item {
-            margin: 16px auto;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 4px;
             background-color: var(--vscode-button-secondaryBackground);
             color: var(--vscode-button-secondaryForeground);
-            font-size: 0.95em;
-            transition: transform 0.2s ease;
-            width: 85%;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            opacity: 0.9;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .feature-item:hover {
-            transform: translateX(5px);
+            opacity: 1;
+            transform: translateY(-1px);
         }
 
         .auth-text {
-            margin: 24px 0;
+            margin: 32px 0 24px;
             color: var(--vscode-descriptionForeground);
-            font-size: 1.05em;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -169,15 +172,15 @@ export function getSidebarHtml(
     ${!isAuthenticated ? `
         <div class="login-container">
             <div class="welcome-header">
-                <h2>📚 Welcome to Prompt Playbook</h2>
-                <p class="welcome-subtext">Your AI-powered prompt engineering companion</p>
+                <h2>Welcome to Prompt Playbook</h2>
+                <p class="welcome-subtext">Enhance your development workflow with AI-powered prompt engineering</p>
                 <div class="feature-list">
-                    <div class="feature-item">✨ Context-aware suggestions</div>
-                    <div class="feature-item">🔍 Smart prompt library</div>
-                    <div class="feature-item">🚀 AI-powered enhancement</div>
+                    <div class="feature-item">✨ Smart context-aware suggestions</div>
+                    <div class="feature-item">📚 Curated prompt templates</div>
+                    <div class="feature-item">🔄 Real-time prompt enhancement</div>
                 </div>
             </div>
-            <p class="auth-text">Please sign in with GitHub to get started</p>
+            <p class="auth-text">Sign in with GitHub to get started</p>
             <button class="github-button" id="github-login">
                 <svg height="16" viewBox="0 0 16 16" width="16">
                     <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
